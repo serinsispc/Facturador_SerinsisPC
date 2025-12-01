@@ -1,0 +1,138 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="Facturador_SerinsisPC.Site1" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%-- colocamos el icono en la pestaña de la pagina --%>
+    <link rel="shortcut icon" href="img/logo.ico" type="image/x-icon" />
+
+    <!-- Bootstrap CSS -->
+    <link href="Bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <%-- css-table --%>
+    <link href="css/css_table.css" rel="stylesheet" />
+
+    <%--Datatables--%>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.12.1/datatables.min.css"/>
+
+    <%-- estilos internos --%>
+    <link href="css/StyleAdd.css" rel="stylesheet" />
+    <link href="css/csshake-little.css" rel="stylesheet" type="text/css">
+
+    <%-- iconos --%>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />
+
+    <title>SERINSIS PC</title>
+
+    <script src="js/jquery-3.6.0.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.12.1/datatables.min.js"></script>
+    <script src="js/aletrs.js"></script>
+    <script src="js/swalert.js"></script>
+
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body class="bg-light" style="font-family:'Bahnschrift'">
+    <form id="form1" runat="server">
+            <%-- nav --%>
+            <nav class="navbar navbar-expand-lg navbar-light" id="navbar" style="background-color:dodgerblue">
+                <div class="container">
+                    <a class="navbar-brand" href="#">
+                        <img src="img/logo.png" alt="Alternate Text" width="50" />
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="index.aspx">Cuentas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="clientes.aspx">Clientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="facturar.aspx">Facturar</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="cobrar.aspx">Cobrar</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="notificaiones.aspx">Notificaciones</a>
+                            </li>
+<%--                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown-imvemtario" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Inventario
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown-inventario">
+                                    <a class="dropdown-item" href="tipoProducto.aspx">Tipo Producto</a>
+                                    <a class="dropdown-item" href="categorias.aspx">Categorias</a>
+                                    <a class="dropdown-item" href="proveedor.aspx">Proveedores</a>
+                                    <a class="dropdown-item" href="productos.aspx">Productos</a>
+                                    <a class="dropdown-item" href="kardex.aspx">Kardex</a>
+                                </div>
+                            </li>--%>
+<%--                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContabilidad" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Contabilidad</a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="liquidacion.aspx">Liquidación</a>
+                                    <a class="dropdown-item" href="ventaProductos.aspx">Ventas por producto</a>
+                                    <a class="dropdown-item" href="historialCaja.aspx">Historial de caja</a>
+                                </div>
+                            </li>--%>
+  <%--                          <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Ajustes
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="usuarios.aspx">Usuarios</a>
+                                    <a class="dropdown-item" href="barberos.aspx">Barberos</a>
+                                    <a class="dropdown-item" href="clientes.aspx">Clientes</a>
+                                </div>
+                            </li>--%>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown-perfil" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%= Session["nombreUsuario"] %>&nbsp;<i class="far fa-user"></i>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown-perfil">
+                                    <a class="dropdown-item" href="#">Perfil</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="salir.aspx"><i class="fas fa-power-off">&nbsp;Salir</i></a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+
+            <main class="container">
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+
+                </asp:ContentPlaceHolder>
+            </main>
+
+        <footer class="navbar navbar-expand-lg navbar-light footer w-100" style="background-color:dodgerblue">
+            <div class="container">
+                <asp:Label Text="© 2022 Página web desarrollada por www.serinsispc.com" runat="server" Font-Size="X-Small" />
+                <div class="form-inline my-2 my-lg-0">
+                    <a href="login.aspx" type="button" class="nav-link text-light"><i class="far fa-user"></i>&nbsp;Login</a>
+
+                </div>
+            </div>
+        </footer>
+
+    </form>
+    <script src="js/jquery-3.6.0.js"></script>
+    <script src="Bootstrap/js/popper.min.js"></script>
+    <script src="Bootstrap/js/bootstrap.min.js"></script>
+
+
+    <script>
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $('#content-wrapper').toggleClass("toggled")
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="8905be217c18418085629f4ff71e2639" Name="Diagram1">
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.Clientes" Width="1.5" PointX="3" PointY="1.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.CobrosEnviados" Width="1.5" PointX="5.25" PointY="1.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.DatBases" Width="1.5" PointX="5.25" PointY="4.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.EstadoMensualidad" Width="1.5" PointX="7.75" PointY="1.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.Facturas" Width="1.5" PointX="10" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.Mensajes" Width="1.5" PointX="0.75" PointY="6.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.Meses" Width="1.5" PointX="7.75" PointY="5.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.sysdiagrams" Width="1.5" PointX="2.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.TipoPlan" Width="1.5" PointX="0.75" PointY="2.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.EstadoCuentaClientes" Width="1.5" PointX="4.75" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.V_Clientes" Width="1.5" PointX="6.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.V_CobrosEnviados" Width="1.5" PointX="8.75" PointY="8.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.V_CobroWhatsApp" Width="1.5" PointX="0.75" PointY="10.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DBMensualidadesSerinsisPCModel.V_Facturas" Width="1.5" PointX="2.75" PointY="10.75" IsExpanded="true" />
+        <AssociationConnector Association="DBMensualidadesSerinsisPCModel.FK__Clientes__idTipo__3C69FB99" ManuallyRouted="false" />
+        <AssociationConnector Association="DBMensualidadesSerinsisPCModel.FK__CobrosEnv__idCli__412EB0B6" ManuallyRouted="false" />
+        <AssociationConnector Association="DBMensualidadesSerinsisPCModel.FK__DatBases__idClie__60A75C0F" ManuallyRouted="false" />
+        <AssociationConnector Association="DBMensualidadesSerinsisPCModel.FK__Facturas__idEsta__38996AB5" ManuallyRouted="false" />
+        <AssociationConnector Association="DBMensualidadesSerinsisPCModel.FK__Facturas__idMes__398D8EEE" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

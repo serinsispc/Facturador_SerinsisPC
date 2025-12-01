@@ -1,0 +1,186 @@
+﻿html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+}
+
+.horario {
+    background-image: url(../img/fondos/pexels-maria-orlova-4969838.jpg);
+    background-size:cover;
+    background-position:center;
+}
+
+.modal-lg {
+    max-width: 90% !important;
+}
+
+
+.zoom {
+}
+.header {
+    background-size: cover;
+    min-height: 100vh;
+}
+
+    .header .navbar {
+        /*background-color: transparent !important;*/
+        opacity:0.9;
+    }
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    height: 50px;
+}
+.imgHorario{
+    z-index:-1;
+}
+.opasidad {
+    opacity: 0.7;
+}
+
+.transparente{
+    position:absolute;
+    width:100%;
+    z-index:1;
+}
+
+.mayus{
+    text-transform:uppercase;
+}
+
+.center-padre{
+text-align:center;
+}
+.negrita{
+    font-weight:bold;
+}
+.center-hijo {
+    margin:0px auto;
+}
+.linkMenu{
+   color:black; 
+   font-weight:bold;
+}
+
+/*.bg-light {
+    background-color: var(--light) !important
+}*/
+
+.userMenu{
+    font-size:15px;
+}
+
+#sidebar-container {
+    min-height: 100vh;
+    margin-left: -13rem;
+    transition: margin .25s ease-in-out;
+}
+
+#sidebar-container .logo{
+    padding:.875rem 1.25rem;
+    font-size:1.2rem;
+}
+
+    #sidebar-container .menu {
+        width: 13rem;
+    }
+
+#content-wrapper.toggled #sidebar-container{
+    margin-left:0;
+}
+
+
+@media(min-width:768px) {
+    #sidebar-container{
+        margin-left:0;
+    }
+    #page-container{
+        min-width:0;
+        width:100%;
+    }
+    .userMenu {
+        display:none;
+    }
+
+}
+
+.Modal-padre {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255,255,255,.70);
+    
+    z-index: 200;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.Modal-mensage {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    z-index: ;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/*******************  Pagina Sedes ***************************/
+.lineaTitulo {
+    width: 100%;
+    background-color: darkgray;
+    height: 1.5px;
+}
+
+#titulo{
+    font-size: 35px;
+}
+#titulo2 #titulo3 {
+    font-size: 25px;
+}
+.containerGV {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.titulo-Cards{
+    text-decoration:none;
+}
+.sombra {
+    box-shadow: 0px 10px 10px #007BFF;
+}
+#titulo-icon {
+    font-size: 35px;
+    cursor:pointer;
+    margin-right:20px;
+}
+
+.zoom {
+    transition: 0.5s ease;
+    -moz-transition: 0.5s ease; /* Firefox */
+    -webkit-transition: 0.5s ease; /* Chrome - Safari */
+    -o-transition: 0.5s ease; /* Opera */
+}
+
+    .zoom:hover {
+        transform: scale(1.1);
+        -moz-transform: scale(1.1); /* Firefox */
+        -webkit-transform: scale(1.1); /* Chrome - Safari */
+        -o-transform: scale(1.1); /* Opera */
+        -ms-transform: scale(1.1); /* IE9 */
+    }
+.borderDG{
+    border-radius:50px;
+}
