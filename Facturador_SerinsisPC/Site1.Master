@@ -31,71 +31,396 @@
     <script src="js/aletrs.js"></script>
     <script src="js/swalert.js"></script>
 
+    <style>
+        :root {
+            --spc-navy: #2a22a6;
+            --spc-navy-2: #3a33bc;
+            --spc-blue: #62afe2;
+            --spc-blue-soft: #eef8fe;
+            --spc-blue-line: #c9e3f5;
+            --spc-text: #22305e;
+            --spc-muted: #6782a6;
+            --spc-surface: #ffffff;
+            --spc-surface-2: #f7fbff;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(98, 175, 226, 0.16), transparent 22%),
+                linear-gradient(180deg, #fbfdff 0%, #f1f7fc 100%);
+            color: var(--spc-text);
+        }
+
+        .admin-shell {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .admin-sidebar {
+            width: 274px;
+            flex: 0 0 274px;
+            background: linear-gradient(180deg, #211b84 0%, var(--spc-navy) 42%, var(--spc-navy-2) 100%);
+            color: #ffffff;
+            padding: 1.1rem .9rem;
+            box-shadow: 14px 0 30px rgba(42, 34, 166, 0.16);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 1030;
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            color: #ffffff;
+            text-decoration: none;
+            padding: .55rem .7rem .85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            margin-bottom: .85rem;
+        }
+
+        .admin-brand:hover {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .admin-brand__logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.14);
+            padding: .24rem;
+        }
+
+        .admin-brand__title {
+            display: block;
+            font-size: 1.02rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .admin-brand__subtitle {
+            display: block;
+            font-size: .76rem;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .admin-sidebar__section {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: rgba(198, 220, 255, 0.56);
+            padding: .2rem .8rem;
+            margin-bottom: .35rem;
+        }
+
+        .admin-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .admin-nav__item + .admin-nav__item {
+            margin-top: .22rem;
+        }
+
+        .admin-nav__link {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            padding: .72rem .82rem;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: .96rem;
+            transition: background-color .18s ease, transform .18s ease, color .18s ease;
+        }
+
+        .admin-nav__link:hover {
+            color: #ffffff;
+            text-decoration: none;
+            background: rgba(98, 175, 226, 0.18);
+            transform: translateX(3px);
+        }
+
+        .admin-nav__link--active {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f9ff 100%);
+            color: var(--spc-navy);
+            box-shadow: 0 10px 20px rgba(42, 34, 166, 0.14);
+        }
+
+        .admin-nav__icon {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.10);
+            font-size: .95rem;
+        }
+
+        .admin-nav__link--active .admin-nav__icon {
+            background: rgba(98, 175, 226, 0.20);
+        }
+
+        .admin-sidebar__footer {
+            margin-top: auto;
+            padding: .9rem .7rem 0;
+            border-top: 1px solid rgba(173, 204, 255, 0.16);
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: .75rem;
+        }
+
+        .admin-user__avatar {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(98, 175, 226, 0.18);
+        }
+
+        .admin-user__name {
+            font-weight: 700;
+            font-size: .95rem;
+        }
+
+        .admin-user__role {
+            font-size: .76rem;
+            color: rgba(255, 255, 255, 0.66);
+        }
+
+        .admin-user__actions {
+            display: flex;
+            gap: .5rem;
+        }
+
+        .admin-user__action {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            color: #ffffff;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.10);
+            border-radius: 11px;
+            padding: .58rem .7rem;
+            font-weight: 600;
+            font-size: .9rem;
+        }
+
+        .admin-user__action:hover {
+            color: #ffffff;
+            text-decoration: none;
+            background: rgba(98, 175, 226, 0.18);
+        }
+
+        .admin-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-topbar {
+            display: none;
+            position: sticky;
+            top: 0;
+            z-index: 1031;
+            background: linear-gradient(135deg, var(--spc-navy) 0%, var(--spc-blue) 100%);
+            box-shadow: 0 10px 28px rgba(42, 34, 166, 0.16);
+            padding: .75rem 1rem;
+        }
+
+        .admin-topbar__brand {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 1rem 1rem 1.5rem;
+        }
+
+        .admin-main .container-fluid {
+            max-width: none;
+            width: 100%;
+            padding-left: .35rem;
+            padding-right: .35rem;
+        }
+
+        .admin-footer {
+            background: transparent;
+            padding: 0 1rem .85rem;
+        }
+
+        .admin-footer__panel {
+            width: 100%;
+            margin: 0;
+            background: linear-gradient(135deg, var(--spc-navy) 0%, #4138c7 55%, var(--spc-blue) 100%);
+            color: rgba(255, 255, 255, 0.82);
+            border-radius: 16px;
+            padding: .75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .admin-footer__link {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .admin-footer__link:hover {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .admin-shell {
+                display: block;
+            }
+
+            .admin-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: .85rem;
+                border-bottom-left-radius: 20px;
+                border-bottom-right-radius: 20px;
+            }
+
+            .admin-topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .admin-main {
+                padding: .85rem .85rem 1.2rem;
+            }
+
+            .admin-main .container-fluid {
+                padding-left: .1rem;
+                padding-right: .1rem;
+            }
+
+            .admin-footer {
+                padding: 0 .85rem .85rem;
+            }
+        }
+    </style>
+
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
 </head>
 <body class="bg-light" style="font-family:'Bahnschrift'">
     <form id="form1" runat="server">
-            <%-- nav --%>
-            <nav class="navbar navbar-expand-lg navbar-light" id="navbar" style="background-color:dodgerblue">
-                <div class="container">
-                    <a class="navbar-brand" href="#">
-                        <img src="img/logo.png" alt="Alternate Text" width="50" />
-                    </a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
+        <div class="admin-shell">
+            <aside class="admin-sidebar">
+                <a class="admin-brand" href="index.aspx">
+                    <img src="img/logo.png" alt="SERINSIS PC" class="admin-brand__logo" />
+                    <span>
+                        <span class="admin-brand__title">SERINSIS PC</span>
+                        <span class="admin-brand__subtitle">Panel Administrativo</span>
+                    </span>
+                </a>
 
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav ml-auto">
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.aspx">Cuentas</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="clientes.aspx">Clientes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="facturar.aspx">Facturar</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="cobrar.aspx">Cobrar</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="notificaiones.aspx">Notificaciones</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="tapazo.aspx">Tapazo</a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown-perfil" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%= Session["nombreUsuario"] %>&nbsp;<i class="far fa-user"></i>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown-perfil">
-                                    <a class="dropdown-item" href="#">Perfil</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="salir.aspx"><i class="fas fa-power-off">&nbsp;Salir</i></a>
-                                </div>
-                            </li>
-                        </ul>
+                <div class="admin-sidebar__section">Navegación</div>
+                <ul class="admin-nav">
+                    <li class="admin-nav__item">
+                        <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("index.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="index.aspx">
+                            <span class="admin-nav__icon"><i class="fas fa-layer-group"></i></span>
+                            <span>Cuentas</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item">
+                        <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("clientes.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="clientes.aspx">
+                            <span class="admin-nav__icon"><i class="fas fa-users"></i></span>
+                            <span>Clientes</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item">
+                        <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("facturar.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="facturar.aspx">
+                            <span class="admin-nav__icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                            <span>Facturar</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item">
+                        <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("cobrar.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="cobrar.aspx">
+                            <span class="admin-nav__icon"><i class="fas fa-money-check-alt"></i></span>
+                            <span>Cobrar</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item">
+                        <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("notificaiones.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="notificaiones.aspx">
+                            <span class="admin-nav__icon"><i class="fas fa-bell"></i></span>
+                            <span>Notificaciones</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="admin-sidebar__footer">
+                    <div class="admin-user">
+                        <span class="admin-user__avatar"><i class="far fa-user"></i></span>
+                        <div>
+                            <div class="admin-user__name"><%= string.IsNullOrWhiteSpace(Convert.ToString(Session["nombreUsuario"])) ? "Usuario" : Convert.ToString(Session["nombreUsuario"]) %></div>
+                            <div class="admin-user__role">Administrador</div>
+                        </div>
+                    </div>
+                    <div class="admin-user__actions">
+                        <a class="admin-user__action" href="#"><i class="far fa-id-badge"></i>&nbsp;Perfil</a>
+                        <a class="admin-user__action" href="salir.aspx"><i class="fas fa-power-off"></i>&nbsp;Salir</a>
                     </div>
                 </div>
-            </nav>
+            </aside>
 
-
-            <main class="">
-                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
-
-                </asp:ContentPlaceHolder>
-            </main>
-
-        <footer class="navbar navbar-expand-lg navbar-light footer w-100" style="background-color:dodgerblue">
-            <div class="container">
-                <asp:Label Text="© 2022 Página web desarrollada por www.serinsispc.com" runat="server" Font-Size="X-Small" />
-                <div class="form-inline my-2 my-lg-0">
-                    <a href="login.aspx" type="button" class="nav-link text-light"><i class="far fa-user"></i>&nbsp;Login</a>
-
+            <div class="admin-content">
+                <div class="admin-topbar">
+                    <div class="admin-topbar__brand">
+                        <img src="img/logo.png" alt="SERINSIS PC" width="34" />
+                        <span>SERINSIS PC</span>
+                    </div>
                 </div>
+
+                <main class="admin-main">
+                    <div class="container-fluid">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+
+                        </asp:ContentPlaceHolder>
+                    </div>
+                </main>
+
+                <footer class="admin-footer">
+                    <div class="admin-footer__panel">
+                        <asp:Label Text="© 2022 SERINSIS PC S.A.S. | Plataforma administrativa" runat="server" Font-Size="X-Small" />
+                        <a href="login.aspx" type="button" class="admin-footer__link"><i class="far fa-user"></i>&nbsp;Acceso</a>
+                    </div>
+                </footer>
             </div>
-        </footer>
+        </div>
 
     </form>
     <script src="js/jquery-3.6.0.js"></script>

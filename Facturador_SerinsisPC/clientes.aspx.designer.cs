@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <generado automáticamente>
 //     Este código fue generado por una herramienta.
 //
@@ -17,136 +17,111 @@ namespace Facturador_SerinsisPC
         /// <summary>
         /// Control panelModal.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Panel panelModal;
 
         /// <summary>
         /// Control lblTituloModal.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblTituloModal;
 
         /// <summary>
         /// Control btnCerrarModal1.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnCerrarModal1;
 
         /// <summary>
         /// Control ddl_TipoPlan.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddl_TipoPlan;
 
         /// <summary>
         /// Control txtNit.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtNit;
 
         /// <summary>
         /// Control txtNombreComersial.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtNombreComersial;
 
         /// <summary>
         /// Control txtRepresentante.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtRepresentante;
 
         /// <summary>
         /// Control txtWhatSapp.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtWhatSapp;
 
         /// <summary>
         /// Control txtValor.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtValor;
 
         /// <summary>
         /// Control txtCorreo.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtCorreo;
 
         /// <summary>
         /// Control txtSedes.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtSedes;
 
         /// <summary>
         /// Control btnCerrarModal2.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnCerrarModal2;
 
         /// <summary>
         /// Control btnGuardar.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnGuardar;
+
+        /// <summary>
+        /// Control panelModalDB.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Panel panelModalDB;
+
+        /// <summary>
+        /// Control btnCerrarModalDB1.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.LinkButton btnCerrarModalDB1;
+
+        /// <summary>
+        /// Control lblClienteDB.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Label lblClienteDB;
+
+        /// <summary>
+        /// Control ddl_db.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.DropDownList ddl_db;
+
+        /// <summary>
+        /// Control btn_Agregar.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Button btn_Agregar;
+
+        /// <summary>
+        /// Control rpDB_Cliente.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Repeater rpDB_Cliente;
+
+        /// <summary>
+        /// Control btnCerrarModalDB2.
+        /// </summary>
+        protected global::System.Web.UI.WebControls.LinkButton btnCerrarModalDB2;
 
         /// <summary>
         /// Control btnNuevoCliente.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnNuevoCliente;
 
         /// <summary>
         /// Control rpClientes.
         /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rpClientes;
     }
 }

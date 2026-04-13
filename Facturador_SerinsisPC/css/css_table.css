@@ -1,19 +1,26 @@
 ﻿
 .table-cebra{
-    border-top:solid 1px #ccc;
+    width:100%;
+    border-top:solid 1px #cfe2f3;
     border-spacing:0;
+    border-collapse:separate;
 }
 
     .table-cebra thead th {
-        background: #1E90FF;
-        color: black;
+        background: linear-gradient(180deg, #5e55d4 0%, #2a22a6 100%);
+        color: #ffffff;
+        font-size: .88rem;
+        font-weight: 700;
+        padding: .55rem .6rem;
+        border-right: 1px solid rgba(255,255,255,.12);
     }
 
     .table-cebra td{
-        border-right:1px solid #ccc;
-       /* min-width:150px;*/
-       padding:0.5rem;
+        border-right:1px solid #d8e6f4;
+       padding:.52rem .6rem;
        text-align:left;
+       color:#243a60;
+       font-size:.94rem;
     }
 
     .table-cebra th:last-child,
@@ -22,22 +29,25 @@
     }
 
     .table-cebra td{
-        border-bottom:1px solid #ccc;
+        border-bottom:1px solid #d8e6f4;
     }
 
     .table-cebra tbody tr{
-        background:white;
+        background:#ffffff;
     }
 
         .table-cebra tbody tr:nth-child(2n) {
-            background: #D8D8D8;
+            background: #f6fbff;
         }
 
 .table-container {
     max-width: 100%;
-    overflow-x: scroll;
-    border-left: solid 1px #ccc;
-    border-right: solid 1px #ccc;
+    overflow-x: auto;
+    border-left: solid 1px #cfe2f3;
+    border-right: solid 1px #cfe2f3;
+    border-bottom: solid 1px #cfe2f3;
+    border-radius: 16px;
+    background:#ffffff;
 }
 
         .table-cebra .sticky{
@@ -46,9 +56,9 @@
         }
 
 .table-cebra tbody tr .sticky {
-    background: white;
+    background: #ffffff;
 }
 
     .table-cebra tbody tr:nth-child(2n) .sticky {
-        background: #D8D8D8;
+        background: #f6fbff;
     }
