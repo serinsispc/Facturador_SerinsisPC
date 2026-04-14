@@ -87,6 +87,7 @@
     <Content Include="Bootstrap\js\popper.min.js" />
     <Content Include="Bootstrap\Login\bootstrap.min.css" />
     <Content Include="clientes.aspx" />
+    <Content Include="clientes_editar.aspx" />
     <Content Include="cobrar.aspx" />
     <Content Include="css\all.css" />
     <Content Include="css\csshake-little.css" />
@@ -99,10 +100,15 @@
     <Content Include="css\StyleLogin.css" />
     <Content Include="css\StyleSuscripcion.css" />
     <Content Include="css\sweetalert.css" />
+    <Content Include="DBMensualidadesSerinsisPC_Cartera.sql" />
+    <Content Include="DBMensualidadesSerinsisPC_Seguridad.sql" />
+    <Content Include="DBMensualidadesSerinsisPC_Seguridad_Auditoria.sql" />
+    <Content Include="DBMensualidadesSerinsisPC_Seguridad_WhatsApp.sql" />
     <Content Include="facturar.aspx" />
     <Content Include="Global.asax" />
     <Content Include="img\logo.ico" />
     <Content Include="img\logo.png" />
+    <Content Include="ingresos.aspx" />
     <Content Include="index.aspx" />
     <Content Include="js\aletrs.js" />
     <Content Include="js\buscadorTablas.js" />
@@ -112,7 +118,9 @@
     <Content Include="js\myScripts.js" />
     <Content Include="js\swalert.js" />
     <Content Include="js\sweetalert.min.js" />
+    <Content Include="login.aspx" />
     <Content Include="notificaiones.aspx" />
+    <Content Include="perfil.aspx" />
     <Content Include="recursos\Imagenes\Barberos\0c656a48-c23c-48dc-8f1e-c2c44b0d3e89.png" />
     <Content Include="recursos\Imagenes\Barberos\2d1b7c0c-dd99-4c56-b2c3-817d4f6fa440.jpg" />
     <Content Include="recursos\Imagenes\Barberos\490f51f4-cb98-4d96-9a4e-234c9a535490.jpg" />
@@ -137,6 +145,7 @@
     <Content Include="recursos\Imagenes\Categorias\70deac87-21d2-4dbc-8d8c-aecd35123b81.png" />
     <Content Include="recursos\Imagenes\Categorias\c7bd955d-5e5f-4851-8092-6748e822dc98.png" />
     <Content Include="recursos\Imagenes\Productos\corteDePeloHombre.png" />
+    <Content Include="salir.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +162,13 @@
     </Compile>
     <Compile Include="clientes.aspx.designer.cs">
       <DependentUpon>clientes.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="clientes_editar.aspx.cs">
+      <DependentUpon>clientes_editar.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="clientes_editar.aspx.designer.cs">
+      <DependentUpon>clientes_editar.aspx</DependentUpon>
     </Compile>
     <Compile Include="cobrar.aspx.cs">
       <DependentUpon>cobrar.aspx</DependentUpon>
@@ -182,30 +198,43 @@
       <DependentUpon>index.aspx</DependentUpon>
     </Compile>
     <Compile Include="Models\Controlers\controladorCuentas.cs" />
+    <Compile Include="Models\Controlers\control_ConfigWhatsAppMeta.cs" />
     <Compile Include="Models\Controlers\controladorDatBases.cs" />
     <Compile Include="Models\Controlers\controladorMensajes.cs" />
     <Compile Include="Models\Controlers\controlador_CobrosEnviados.cs" />
     <Compile Include="Models\Controlers\controlador_V_CobroWhatsApp.cs" />
     <Compile Include="Models\Controlers\control_Clientes.cs" />
     <Compile Include="Models\Controlers\control_Facturas.cs" />
+    <Compile Include="Models\Controlers\control_MetodoPago.cs" />
     <Compile Include="Models\Controlers\control_Meses.cs" />
+    <Compile Include="Models\Controlers\control_PagosRecibidos.cs" />
     <Compile Include="Models\Controlers\control_TipoPlan.cs" />
+    <Compile Include="Models\Controlers\control_UsuarioAdmin.cs" />
+    <Compile Include="Models\Controlers\control_V_ControlPagosClientes.cs" />
+    <Compile Include="Models\Controlers\control_V_IngresosMensuales.cs" />
     <Compile Include="Models\DBEntities.cs" />
     <Compile Include="Models\ViewModels\Clientes.cs" />
+    <Compile Include="Models\ViewModels\ConfigWhatsAppMeta.cs" />
     <Compile Include="Models\ViewModels\CobrosEnviados.cs" />
     <Compile Include="Models\ViewModels\DatBases.cs" />
     <Compile Include="Models\ViewModels\EstadoCuentaClientes.cs" />
     <Compile Include="Models\ViewModels\Facturas.cs" />
     <Compile Include="Models\ViewModels\ListaDB.cs" />
+    <Compile Include="Models\ViewModels\MetodoPago.cs" />
     <Compile Include="Models\ViewModels\Mensajes.cs" />
     <Compile Include="Models\ViewModels\Meses.cs" />
+    <Compile Include="Models\ViewModels\PagosRecibidos.cs" />
     <Compile Include="Models\ViewModels\RespuestaSQL.cs" />
     <Compile Include="Models\ViewModels\Sumas.cs" />
     <Compile Include="Models\ViewModels\TipoPlan.cs" />
+    <Compile Include="Models\ViewModels\UsuarioAdmin.cs" />
     <Compile Include="Models\ViewModels\V_Clientes.cs" />
+    <Compile Include="Models\ViewModels\V_ControlPagosClientes.cs" />
     <Compile Include="Models\ViewModels\V_CobrosEnviados.cs" />
     <Compile Include="Models\ViewModels\V_CobroWhatsApp.cs" />
     <Compile Include="Models\ViewModels\V_Facturas.cs" />
+    <Compile Include="Models\ViewModels\V_IngresosMensuales.cs" />
+    <Compile Include="Models\ViewModels\V_PagosRecibidos.cs" />
     <Compile Include="notificaiones.aspx.cs">
       <DependentUpon>notificaiones.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -213,14 +242,45 @@
     <Compile Include="notificaiones.aspx.designer.cs">
       <DependentUpon>notificaiones.aspx</DependentUpon>
     </Compile>
+    <Compile Include="login.aspx.cs">
+      <DependentUpon>login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="login.aspx.designer.cs">
+      <DependentUpon>login.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="perfil.aspx.cs">
+      <DependentUpon>perfil.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="perfil.aspx.designer.cs">
+      <DependentUpon>perfil.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="salir.aspx.cs">
+      <DependentUpon>salir.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="salir.aspx.designer.cs">
+      <DependentUpon>salir.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Servicios\ClassCartera.cs" />
+    <Compile Include="Servicios\ClassConexionPrincipal.cs" />
     <Compile Include="Servicios\ClassDateTime.cs" />
+    <Compile Include="Servicios\ClassSeguridad.cs" />
     <Compile Include="Site1.Master.cs">
       <DependentUpon>Site1.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Site1.Master.designer.cs">
       <DependentUpon>Site1.Master</DependentUpon>
+    </Compile>
+    <Compile Include="ingresos.aspx.cs">
+      <DependentUpon>ingresos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ingresos.aspx.designer.cs">
+      <DependentUpon>ingresos.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

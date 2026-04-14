@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using Facturador_SerinsisPC.Servicios;
 
 namespace Facturador_SerinsisPC
 {
@@ -11,7 +12,13 @@ namespace Facturador_SerinsisPC
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            ClassConexionPrincipal.Configurar();
 
+            if (Session["idUsuarioAdmin"] == null)
+            {
+                Response.Redirect("login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+            }
         }
     }
 }

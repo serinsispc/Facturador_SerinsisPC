@@ -46,7 +46,10 @@
   <ItemGroup>
     <Compile Include="Acceso.cs" />
     <Compile Include="MetodosJSON.cs" />
+    <Compile Include="Plantillas\mensaje_texto_directo.cs" />
+    <Compile Include="Plantillas\autorizacin_de_proceso_con_cdigo_de_verificacin.cs" />
     <Compile Include="Plantillas\confirmacin_de_pago.cs" />
+    <Compile Include="Plantillas\recuperacion_acceso_admin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Plantillas\recordatorio_de_pago.cs" />
     <Compile Include="WhatsAppRequest.cs" />

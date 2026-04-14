@@ -8,6 +8,7 @@ namespace App_WhatsApp
 {
     public class Acceso
     {
-        public string token { get; set; } = "EAARxUIbOzR4BO3vQ7qN6Y31Xyf3cPiGOkYj2I6LEgIG9Qgk2Nik517mhP2bPZAP086uWxn8EWCZBACXOQB7QISgxzMyjib3T1wocM2OKfYlGZAy3rYOSNBsbwo0nNpbvHg372gG6RMz49dhBMpycYcQmFuOqVFfgD7JCQNmOt7RNEMf7XSAbEVHTJ2fc6CW3QZDZD";
+        public string token { get; set; }
+        public string phoneNumberId { get; set; }
     }
 }

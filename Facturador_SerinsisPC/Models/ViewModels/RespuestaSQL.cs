@@ -9,5 +9,6 @@ namespace Facturador_SerinsisPC.Models.ViewModels
     {
         public bool respuesta {  get; set; }
         public int nuevoId { get; set; }
+        public string mensaje { get; set; }
     }
 }

@@ -28,5 +28,10 @@ namespace Facturador_SerinsisPC.Models.ViewModels
         public int contador { get; set; }
         [Required]
         public int yearFactura { get; set; }
+        public DateTime? fechaVencimiento { get; set; }
+        public DateTime? periodoDesde { get; set; }
+        public DateTime? periodoHasta { get; set; }
+        public decimal saldoPendiente { get; set; }
+        public DateTime? fechaPagoCompleto { get; set; }
     }
 }

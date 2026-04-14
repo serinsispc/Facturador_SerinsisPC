@@ -10,11 +10,24 @@ namespace App_WhatsApp
 {
     public class recordatorio_de_pago
     {
-        public static async Task<WhatsAppResponse> plantilla(string celular,string nombre_cliente, string mes_pendiente, string meses_en_mora,int valor_total, string fecha_limite, string numero_cuenta, string nit_empresa,string titular_cuenta)
+        public static async Task<WhatsAppResponse> plantilla(
+            string celular,
+            string nombre_cliente,
+            string mes_pendiente,
+            string meses_en_mora,
+            int valor_total,
+            string fecha_limite,
+            string numero_cuenta,
+            string nit_empresa,
+            string titular_cuenta,
+            string token,
+            string phoneNumberId)
         {
             MetodosJSON metodosJSON = new MetodosJSON();
 
             WhatsAppRequest whatsApp = new WhatsAppRequest();
+            whatsApp.token = token;
+            whatsApp.phoneNumberId = phoneNumberId;
             whatsApp.messaging_product = $"whatsapp";
             whatsApp.to = "57" + celular;
             whatsApp.type = $"template";

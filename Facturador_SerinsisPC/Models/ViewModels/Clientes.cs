@@ -29,5 +29,10 @@ namespace Facturador_SerinsisPC.Models.ViewModels
         public string nit { get; set; }
         [Required]
         public int estado { get; set; }
+        public int? diaPago { get; set; }
+        public DateTime? fechaInicioPlan { get; set; }
+        public DateTime? fechaUltimoPago { get; set; }
+        public DateTime? fechaProximoPago { get; set; }
+        public string observacionCartera { get; set; }
     }
 }

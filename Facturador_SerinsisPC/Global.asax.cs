@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
+using Facturador_SerinsisPC.Servicios;
 
 namespace Facturador_SerinsisPC
 {
@@ -11,9 +12,7 @@ namespace Facturador_SerinsisPC
     {
         protected void Application_Start(object sender, EventArgs e)
         {
-
-
-
+            ClassConexionPrincipal.Configurar();
         }
     }
 }

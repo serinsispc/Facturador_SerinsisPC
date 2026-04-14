@@ -1,13 +1,14 @@
 using Facturador_SerinsisPC.Models;
 using Facturador_SerinsisPC.Models.Controlers;
 using Facturador_SerinsisPC.Models.ViewModels;
+using Facturador_SerinsisPC.Servicios;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Globalization;
 
 namespace Facturador_SerinsisPC
 {
@@ -16,89 +17,120 @@ namespace Facturador_SerinsisPC
         #region Eventos
         protected void Page_Load(object sender, EventArgs e)
         {
+            RestaurarEstadoModales();
+
             if (!IsPostBack)
             {
                 CargarListaClientes();
                 CargarTipoPlan();
             }
         }
+
         protected void btnNuevoCliente_Click(object sender, EventArgs e)
         {
-            ViewState["idCliente"] = 0;
-            btnGuardar.Text = "Crear";
-            panelModal.Visible = true;
+            Response.Redirect("clientes_editar.aspx", false);
+            Context.ApplicationInstance.CompleteRequest();
         }
+
         protected void btnCerrarModal1_Click(object sender, EventArgs e)
         {
-            panelModal.Visible = false;
+            OcultarModalCliente();
         }
+
         protected void btnCerrarModal2_Click(object sender, EventArgs e)
         {
-            panelModal.Visible = false;
+            OcultarModalCliente();
         }
+
         protected void btnCerrarModalDB_Click(object sender, EventArgs e)
         {
-            panelModalDB.Visible = false;
+            OcultarModalDB();
         }
+
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (VerificarCampos())
+            try
             {
-                bool respuesta;
-                if (btnGuardar.Text == "Crear")
+                lblEstadoGuardar.Visible = true;
+                lblEstadoGuardar.Text = "Entrando a guardar...";
+
+                if (VerificarCampos())
                 {
-                    respuesta = GestionarCliente(0, (int)ViewState["idCliente"]);
+                    int boton = btnGuardar.Text == "Crear" ? 0 : 1;
+                    bool respuesta = GestionarCliente(boton, Convert.ToInt32(ViewState["idCliente"]));
+                    if (respuesta)
+                    {
+                        CargarListaClientes();
+                        OcultarModalCliente();
+                        Mensage(1, "Ok", "Cliente gestionado correctamente.", "success", "clientes.aspx");
+                    }
+                    else
+                    {
+                        MostrarModalCliente();
+                        lblEstadoGuardar.Text = "El procedimiento de base de datos respondio false.";
+                        Mensage(1, "Error", "El proceso termino con error al guardar en base de datos.", "error", "clientes.aspx");
+                    }
                 }
                 else
                 {
-                    respuesta = GestionarCliente(1, (int)ViewState["idCliente"]);
-                }
-                if (respuesta)
-                {
-                    Mensage(1, "¡Ok!", "¡Cliente Gestionado correctamente...!", "success", "clientes.aspx");
-                }
-                else
-                {
-                    Mensage(1, "¡Error!", "¡proceso terminado con error...!", "error", "clientes.aspx");
+                    MostrarModalCliente();
+                    lblEstadoGuardar.Text = "Validacion local fallida: revisa NIT, WhatsApp, valor, sedes, dia de pago e inicio del plan.";
+                    Mensage(2, "Error", "Aun se encuentran campos vacios o datos de pago sin definir.", "error", "");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Mensage(2, "¡Error!", "¡Aun se encuentran capos vacíos...!", "error", "");
+                MostrarModalCliente();
+                lblEstadoGuardar.Visible = true;
+                lblEstadoGuardar.Text = "Excepcion en guardar: " + ex.Message;
+                Mensage(2, "Error", "Fallo btnGuardar_Click: " + ex.Message.Replace("'", ""), "error", "");
             }
         }
+
         protected void btnEditar_Click(object sender, EventArgs e)
         {
             int id = Convert.ToInt32((sender as LinkButton).CommandArgument);
-            ViewState["idCliente"] = id;
-            CargarCamposModals(id);
+            Response.Redirect("clientes_editar.aspx?id=" + id, false);
+            Context.ApplicationInstance.CompleteRequest();
         }
+
         protected void btnEliminar_Click(object sender, EventArgs e)
         {
             int id = Convert.ToInt32((sender as LinkButton).CommandArgument);
             ViewState["idCliente"] = id;
             CargarCamposModals(id);
-            panelModal.Visible = false;
+            OcultarModalCliente();
             if (GestionarCliente(2, id))
             {
-                Mensage(1, "¡Ok!", "¡Cliente Gestionado correctamente...!", "success", "clientes.aspx");
+                Mensage(1, "Ok", "Cliente gestionado correctamente.", "success", "clientes.aspx");
             }
             else
             {
-                Mensage(1, "¡Error!", "¡proceso terminado con error...!", "error", "clientes.aspx");
+                Mensage(1, "Error", "El proceso termino con error.", "error", "clientes.aspx");
             }
         }
+
         protected void btnEstado_Click(object sender, EventArgs e)
         {
             int id = Convert.ToInt32((sender as LinkButton).CommandArgument);
             ViewState["idCliente"] = id;
             Clientes clientes = control_Clientes.ConsultarIdCliente(id);
-            if (clientes != null)
+            if (clientes == null)
             {
-                clientes.estado = clientes.estado == 0 ? 1 : 0;
+                Mensage(2, "Error", "No fue posible consultar la informacion del cliente.", "error", "");
+                return;
             }
-            control_Clientes.Crud(clientes, 1);
+
+            clientes.estado = clientes.estado == 0 ? 1 : 0;
+            RespuestaSQL respuesta = control_Clientes.Crud(clientes, 1);
+            if (respuesta == null || !respuesta.respuesta)
+            {
+                Mensage(2, "Error", "No fue posible actualizar el estado del cliente.", "error", "");
+                return;
+            }
+
             CargarListaClientes();
+            Mensage(2, "Ok", clientes.estado == 1 ? "Cliente activado correctamente." : "Cliente inactivado correctamente.", "success", "");
         }
 
         protected void btnAgregarDB_Click(object sender, EventArgs e)
@@ -106,8 +138,9 @@ namespace Facturador_SerinsisPC
             int id = Convert.ToInt32((sender as LinkButton).CommandArgument);
             ViewState["idClienteDB"] = id;
             CargarModalDB(id);
-            panelModalDB.Visible = true;
+            MostrarModalDB();
         }
+
         protected void btn_Agregar_Click(object sender, EventArgs e)
         {
             if (ViewState["idClienteDB"] == null)
@@ -127,8 +160,9 @@ namespace Facturador_SerinsisPC
             JsonConvert.DeserializeObject<List<RespuestaSQL>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query)).FirstOrDefault();
 
             CargarModalDB(idCliente);
-            panelModalDB.Visible = true;
+            MostrarModalDB();
         }
+
         protected void btnEliminarDB_Click(object sender, EventArgs e)
         {
             if (ViewState["idClienteDB"] == null)
@@ -143,7 +177,7 @@ namespace Facturador_SerinsisPC
                 JsonConvert.DeserializeObject<List<RespuestaSQL>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query)).FirstOrDefault();
                 int idCliente = Convert.ToInt32(ViewState["idClienteDB"]);
                 CargarModalDB(idCliente);
-                panelModalDB.Visible = true;
+                MostrarModalDB();
             }
             catch (Exception ex)
             {
@@ -151,7 +185,39 @@ namespace Facturador_SerinsisPC
             }
         }
 
-        #endregion Fin Eventos
+        protected void btnToggleDB_Click(object sender, EventArgs e)
+        {
+            if (ViewState["idClienteDB"] == null)
+            {
+                return;
+            }
+
+            int id = Convert.ToInt32((sender as LinkButton).CommandArgument);
+            try
+            {
+                string queryConsulta = $"select *from DatBases where id={id}";
+                DatBases datBase = JsonConvert.DeserializeObject<List<DatBases>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, queryConsulta)).FirstOrDefault();
+                if (datBase == null)
+                {
+                    Mensage(2, "Error", "No fue posible consultar la base de datos seleccionada.", "error", "");
+                    return;
+                }
+
+                int nuevoEstado = datBase.estado == 1 ? 0 : 1;
+                string queryUpdate = $"update DatBases set estado={nuevoEstado} where id={id}";
+                DBEntities.ConsultaSQLServer(DBEntities.connectionString, queryUpdate);
+
+                int idCliente = Convert.ToInt32(ViewState["idClienteDB"]);
+                CargarModalDB(idCliente);
+                MostrarModalDB();
+                Mensage(2, "Ok", nuevoEstado == 1 ? "Base de datos marcada como online." : "Base de datos marcada como offline.", "success", "");
+            }
+            catch (Exception ex)
+            {
+                Mensage(2, "Error", "No fue posible cambiar el estado de la base: " + ex.Message.Replace("'", ""), "error", "");
+            }
+        }
+        #endregion
 
         #region Funciones
         protected void CargarListaClientes()
@@ -159,13 +225,37 @@ namespace Facturador_SerinsisPC
             rpClientes.DataSource = control_Clientes.ListaCompleta();
             rpClientes.DataBind();
         }
+
         protected void CargarTipoPlan()
         {
-            ddl_TipoPlan.DataValueField = "id";
-            ddl_TipoPlan.DataTextField = "nombrePlan";
-            ddl_TipoPlan.DataSource = control_TipoPlan.ListaCompleta();
-            ddl_TipoPlan.DataBind();
+            ddl_TipoPlan.Items.Clear();
+
+            List<TipoPlan> tiposPlan = control_TipoPlan.ListaCompleta() ?? new List<TipoPlan>();
+            foreach (TipoPlan tipoPlan in tiposPlan)
+            {
+                ListItem item = new ListItem(tipoPlan.nombrePlan, tipoPlan.id.ToString());
+                item.Attributes["data-periodicidad"] = (tipoPlan.periodicidadMeses <= 0 ? 1 : tipoPlan.periodicidadMeses).ToString(CultureInfo.InvariantCulture);
+                ddl_TipoPlan.Items.Add(item);
+            }
         }
+
+        protected void LimpiarCamposModal()
+        {
+            lblEstadoGuardar.Text = string.Empty;
+            lblEstadoGuardar.Visible = false;
+            txtNit.Text = string.Empty;
+            txtNombreComersial.Text = string.Empty;
+            txtRepresentante.Text = string.Empty;
+            txtWhatSapp.Text = string.Empty;
+            txtValor.Text = string.Empty;
+            txtCorreo.Text = string.Empty;
+            txtSedes.Text = string.Empty;
+            txtDiaPago.Text = "5";
+            txtFechaInicioPlan.Text = DateTime.Today.ToString("yyyy-MM-dd");
+            txtFechaProximoPago.Text = ClassCartera.CalcularPrimeraFechaPago(DateTime.Today, 5).ToString("yyyy-MM-dd");
+            txtObservacionCartera.Text = string.Empty;
+        }
+
         protected void CargarModalDB(int idCliente)
         {
             V_Clientes vCliente = control_Clientes.ConsultarIdCliente_vista(idCliente);
@@ -179,13 +269,13 @@ namespace Facturador_SerinsisPC
             CargarListaDBDisponibles();
             CargarDBCliente(idCliente);
         }
+
         protected void CargarListaDBDisponibles()
         {
             try
             {
-                List<ListaDB> listaDB = new List<ListaDB>();
-                string query = $"select *from ListaDB";
-                listaDB = JsonConvert.DeserializeObject<List<ListaDB>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query));
+                string query = "select *from ListaDB";
+                List<ListaDB> listaDB = JsonConvert.DeserializeObject<List<ListaDB>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query));
                 if (listaDB.Count > 0)
                 {
                     ddl_db.DataValueField = "database_id";
@@ -199,39 +289,37 @@ namespace Facturador_SerinsisPC
                 string e = ex.Message;
             }
         }
+
         protected void CargarDBCliente(int idCliente)
         {
-            List<DatBases> datBases = new List<DatBases>();
             string query = $"select *from DatBases where idCliente={idCliente}";
-            datBases = JsonConvert.DeserializeObject<List<DatBases>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query));
+            List<DatBases> datBases = JsonConvert.DeserializeObject<List<DatBases>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query));
             rpDB_Cliente.DataSource = datBases;
             rpDB_Cliente.DataBind();
         }
+
         protected bool VerificarCampos()
         {
-            if (ddl_TipoPlan.SelectedItem.Text != "" &&
-               txtNit.Text != "" &&
-               txtNombreComersial.Text != "" &&
-               txtRepresentante.Text != "" &&
-               txtWhatSapp.Text != "" &&
-               txtValor.Text != "" &&
-               txtCorreo.Text != "" &&
-               txtSedes.Text != "")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return ddl_TipoPlan.SelectedItem != null &&
+                   LimpiarSoloDigitos(txtNit.Text) != string.Empty &&
+                   txtNombreComersial.Text != string.Empty &&
+                   txtRepresentante.Text != string.Empty &&
+                   txtWhatSapp.Text != string.Empty &&
+                   txtValor.Text != string.Empty &&
+                   txtCorreo.Text != string.Empty &&
+                   txtSedes.Text != string.Empty &&
+                   txtDiaPago.Text != string.Empty &&
+                   txtFechaInicioPlan.Text != string.Empty;
         }
+
         protected void CargarCamposModals(int idCliente)
         {
-            V_Clientes vCliente = new V_Clientes();
-            vCliente = control_Clientes.ConsultarIdCliente_vista(idCliente);
+            V_Clientes vCliente = control_Clientes.ConsultarIdCliente_vista(idCliente);
             if (vCliente != null)
             {
-                ddl_TipoPlan.SelectedItem.Text = Convert.ToString(vCliente.nombrePlan);
+                lblEstadoGuardar.Text = string.Empty;
+                lblEstadoGuardar.Visible = false;
+                ddl_TipoPlan.SelectedValue = Convert.ToString(vCliente.idTipoPlan);
                 txtNit.Text = vCliente.nit;
                 txtNombreComersial.Text = vCliente.nombreComercial;
                 txtRepresentante.Text = vCliente.nombreRepresentate;
@@ -239,12 +327,45 @@ namespace Facturador_SerinsisPC
                 txtValor.Text = Convert.ToString(Convert.ToInt32(vCliente.valorPlan));
                 txtCorreo.Text = vCliente.correo;
                 txtSedes.Text = Convert.ToString(vCliente.sedes);
-
+                txtDiaPago.Text = Convert.ToString(vCliente.diaPago ?? 5);
+                txtFechaInicioPlan.Text = vCliente.fechaInicioPlan.HasValue ? vCliente.fechaInicioPlan.Value.ToString("yyyy-MM-dd") : string.Empty;
+                txtFechaProximoPago.Text = vCliente.fechaProximoPago.HasValue ? vCliente.fechaProximoPago.Value.ToString("yyyy-MM-dd") : string.Empty;
+                txtObservacionCartera.Text = vCliente.observacionCartera;
                 btnGuardar.Text = "Editar";
-
-                panelModal.Visible = true;
+                MostrarModalCliente();
             }
         }
+
+        protected void RestaurarEstadoModales()
+        {
+            panelModal.Style["display"] = Convert.ToBoolean(ViewState["ModalClienteVisible"] ?? false) ? "flex" : "none";
+            panelModalDB.Style["display"] = Convert.ToBoolean(ViewState["ModalDBVisible"] ?? false) ? "flex" : "none";
+        }
+
+        protected void MostrarModalCliente()
+        {
+            ViewState["ModalClienteVisible"] = true;
+            panelModal.Style["display"] = "flex";
+        }
+
+        protected void OcultarModalCliente()
+        {
+            ViewState["ModalClienteVisible"] = false;
+            panelModal.Style["display"] = "none";
+        }
+
+        protected void MostrarModalDB()
+        {
+            ViewState["ModalDBVisible"] = true;
+            panelModalDB.Style["display"] = "flex";
+        }
+
+        protected void OcultarModalDB()
+        {
+            ViewState["ModalDBVisible"] = false;
+            panelModalDB.Style["display"] = "none";
+        }
+
         protected void Mensage(int estilo, string titulo, string mensage, string tipo, string aspx)
         {
             if (estilo == 1)
@@ -256,35 +377,84 @@ namespace Facturador_SerinsisPC
                 ClientScript.RegisterStartupScript(this.GetType(), "randomtext", "alerta2('" + titulo + "','" + mensage + "','" + tipo + "','" + "');", true);
             }
         }
-        protected bool GestionarCliente(int Boton, int idCliente)
+
+        protected int ObtenerPeriodicidadPlan()
         {
-            Clientes clientes = new Clientes();
-            clientes = control_Clientes.ConsultarIdCliente(idCliente);
-            if (clientes != null)
+            int idTipoPlan = Convert.ToInt32(ddl_TipoPlan.SelectedValue);
+            TipoPlan tipoPlan = control_TipoPlan.ListaCompleta().FirstOrDefault(x => x.id == idTipoPlan);
+            return tipoPlan == null || tipoPlan.periodicidadMeses <= 0 ? 1 : tipoPlan.periodicidadMeses;
+        }
+
+        protected bool GestionarCliente(int boton, int idCliente)
+        {
+            Clientes clientes = control_Clientes.ConsultarIdCliente(idCliente);
+            if (clientes != null && boton == 0)
             {
-                if (Boton == 0)
-                {
-                    return false;
-                }
+                return false;
             }
-            if (Boton == 0)
+
+            if (boton == 0 || clientes == null)
             {
                 clientes = new Clientes();
                 idCliente = 0;
             }
+
+            int diaPago = Convert.ToInt32(txtDiaPago.Text);
+            DateTime fechaInicioPlan = ParseFechaFormulario(txtFechaInicioPlan.Text);
+            DateTime? fechaUltimoPago = clientes.fechaUltimoPago;
+            int periodicidadMeses = ObtenerPeriodicidadPlan();
+            DateTime fechaProximoPago = fechaUltimoPago.HasValue
+                ? ClassCartera.CalcularProximaFechaPago(fechaUltimoPago.Value, diaPago, periodicidadMeses)
+                : ClassCartera.CalcularProximoPagoInicial(fechaInicioPlan, diaPago, periodicidadMeses);
+
             clientes.id = idCliente;
             clientes.idTipoPlan = Convert.ToInt32(ddl_TipoPlan.SelectedItem.Value);
-            clientes.nit = txtNit.Text;
+            clientes.nit = LimpiarSoloDigitos(txtNit.Text);
             clientes.nombreComercial = txtNombreComersial.Text.ToUpper();
             clientes.nombreRepresentate = txtRepresentante.Text.ToUpper();
             clientes.celular = txtWhatSapp.Text;
             clientes.correo = txtCorreo.Text;
             clientes.sedes = Convert.ToInt32(txtSedes.Text);
             clientes.valorPlan = Convert.ToDecimal(txtValor.Text);
-            clientes.estado = 1;
-            return control_Clientes.Crud(clientes, Boton).respuesta;
+            clientes.estado = boton == 0 ? 1 : (clientes.estado == 0 ? 0 : 1);
+            clientes.diaPago = diaPago;
+            clientes.fechaInicioPlan = fechaInicioPlan;
+            clientes.fechaUltimoPago = fechaUltimoPago;
+            clientes.fechaProximoPago = fechaProximoPago;
+            clientes.observacionCartera = txtObservacionCartera.Text;
+            txtFechaProximoPago.Text = fechaProximoPago.ToString("yyyy-MM-dd");
+
+            RespuestaSQL respuesta = control_Clientes.Crud(clientes, boton);
+            return respuesta != null && respuesta.respuesta;
         }
 
-        #endregion Fin Funciones
+        protected string LimpiarSoloDigitos(string valor)
+        {
+            return new string((valor ?? string.Empty).Where(char.IsDigit).ToArray());
+        }
+
+        protected DateTime ParseFechaFormulario(string valor)
+        {
+            string[] formatos = { "yyyy-MM-dd", "dd/MM/yyyy", "d/M/yyyy", "MM/dd/yyyy", "M/d/yyyy" };
+            DateTime fecha;
+
+            if (DateTime.TryParseExact(valor, formatos, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
+            {
+                return fecha;
+            }
+
+            if (DateTime.TryParse(valor, new CultureInfo("es-CO"), DateTimeStyles.None, out fecha))
+            {
+                return fecha;
+            }
+
+            if (DateTime.TryParse(valor, CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
+            {
+                return fecha;
+            }
+
+            throw new FormatException("La fecha de inicio del plan no tiene un formato valido.");
+        }
+        #endregion
     }
 }

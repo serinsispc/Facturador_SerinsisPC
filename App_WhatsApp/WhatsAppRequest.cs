@@ -12,6 +12,7 @@ namespace App_WhatsApp
         public string to { get; set; }
         public string type { get; set; }
         public Template template { get; set; }
+        public TextContent text { get; set; }
     }
     public class Template
     {
@@ -33,5 +34,11 @@ namespace App_WhatsApp
         public string type { get; set; }
         public string parameter_name { get; set; }
         public string text { get; set; }
+    }
+
+    public class TextContent
+    {
+        public bool preview_url { get; set; }
+        public string body { get; set; }
     }
 }

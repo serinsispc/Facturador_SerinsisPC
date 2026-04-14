@@ -213,6 +213,22 @@
             padding: .5rem .95rem;
         }
 
+        .clientes-page .swal2-container {
+            z-index: 3000 !important;
+        }
+
+        .clientes-inline-status {
+            display: block;
+            margin-top: .35rem;
+            padding: .65rem .8rem;
+            border-radius: 10px;
+            background: #fff4e8;
+            border: 1px solid #ffd8b1;
+            color: #9a4d00;
+            font-size: .9rem;
+            font-weight: 700;
+        }
+
         .db-client-chip {
             display: inline-flex;
             align-items: center;
@@ -316,12 +332,28 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
+            min-width: 34px;
             height: 34px;
             border-radius: 10px;
             text-decoration: none;
+            padding: 0 .7rem;
+            margin-right: .35rem;
+            font-weight: 700;
+        }
+
+        .db-inline-option--delete {
             background: #fff0f2;
             color: #d8344a;
+        }
+
+        .db-inline-option--toggle-on {
+            background: #ecfbf2;
+            color: #1f9b53;
+        }
+
+        .db-inline-option--toggle-off {
+            background: #fff7e7;
+            color: #c98916;
         }
 
         @media (max-width: 991.98px) {
@@ -353,7 +385,7 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div class="clientes-page">
-        <asp:Panel ID="panelModal" Visible="false" runat="server" CssClass="Modal-padre">
+        <asp:Panel ID="panelModal" runat="server" CssClass="Modal-padre" Style="display:none;">
             <div tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
                 <div class="modal-dialog modal-lg clientes-modal" role="document">
                     <div class="modal-content">
@@ -374,7 +406,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label>NIT.</label>
-                                    <asp:TextBox runat="server" ID="txtNit" CssClass="form-control" TextMode="Number" />
+                                    <asp:TextBox runat="server" ID="txtNit" CssClass="form-control" MaxLength="15" />
                                 </div>
                                 <div class="col-md-12">
                                     <label>Nombre Comercial</label>
@@ -400,18 +432,37 @@
                                     <label>Sedes</label>
                                     <asp:TextBox runat="server" ID="txtSedes" CssClass="form-control mayus" TextMode="Number" />
                                 </div>
+                                <div class="col-md-4">
+                                    <label>Dia de Pago</label>
+                                    <asp:TextBox runat="server" ID="txtDiaPago" CssClass="form-control" TextMode="Number" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Inicio del Plan</label>
+                                    <asp:TextBox runat="server" ID="txtFechaInicioPlan" CssClass="form-control" TextMode="Date" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Proximo Pago</label>
+                                    <asp:TextBox runat="server" ID="txtFechaProximoPago" CssClass="form-control" TextMode="Date" ReadOnly="true" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Observacion de Cartera</label>
+                                    <asp:TextBox runat="server" ID="txtObservacionCartera" CssClass="form-control" TextMode="MultiLine" Rows="3" />
+                                </div>
+                                <div class="col-md-12">
+                                    <asp:Label runat="server" ID="lblEstadoGuardar" CssClass="clientes-inline-status" Visible="false" />
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <asp:LinkButton ID="btnCerrarModal2" runat="server" class="btn btn-secondary" OnClick="btnCerrarModal2_Click">Cerrar</asp:LinkButton>
-                            <asp:LinkButton ID="btnGuardar" runat="server" class="btn btn-primary" OnClick="btnGuardar_Click"></asp:LinkButton>
+                            <asp:Button ID="btnGuardar" runat="server" CssClass="btn btn-primary" OnClick="btnGuardar_Click" UseSubmitBehavior="false" CausesValidation="false" />
                         </div>
                     </div>
                 </div>
             </div>
         </asp:Panel>
 
-        <asp:Panel ID="panelModalDB" Visible="false" runat="server" CssClass="Modal-padre">
+        <asp:Panel ID="panelModalDB" runat="server" CssClass="Modal-padre" Style="display:none;">
             <div tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-lg clientes-modal" role="document">
                     <div class="modal-content">
@@ -461,11 +512,14 @@
                                                     <td>
                                                         <span class='db-inline-state <%# Convert.ToInt32(Eval("estado")) == 1 ? "db-inline-state--activo" : "db-inline-state--inactivo" %>'>
                                                             <i class='fas <%# Convert.ToInt32(Eval("estado")) == 1 ? "fa-check-circle" : "fa-pause-circle" %>'></i>
-                                                            <%# Convert.ToInt32(Eval("estado")) == 1 ? "Activa" : "Inactiva" %>
+                                                            <%# Convert.ToInt32(Eval("estado")) == 1 ? "Online" : "Offline" %>
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <asp:LinkButton runat="server" ID="btnEliminarDB" CssClass="db-inline-option" ToolTip="Eliminar relación" OnClick="btnEliminarDB_Click" CommandArgument='<%# Eval("id") %>'><i class="fas fa-trash-alt"></i></asp:LinkButton>
+                                                        <asp:LinkButton runat="server" ID="btnToggleDB" CssClass='<%# "db-inline-option " + (Convert.ToInt32(Eval("estado")) == 1 ? "db-inline-option--toggle-off" : "db-inline-option--toggle-on") %>' ToolTip='<%# Convert.ToInt32(Eval("estado")) == 1 ? "Pasar a offline" : "Pasar a online" %>' OnClick="btnToggleDB_Click" CommandArgument='<%# Eval("id") %>'>
+                                                            <i class='fas <%# Convert.ToInt32(Eval("estado")) == 1 ? "fa-power-off" : "fa-play" %>'></i>&nbsp;<%# Convert.ToInt32(Eval("estado")) == 1 ? "Offline" : "Online" %>
+                                                        </asp:LinkButton>
+                                                        <asp:LinkButton runat="server" ID="btnEliminarDB" CssClass="db-inline-option db-inline-option--delete" ToolTip="Eliminar relación" OnClick="btnEliminarDB_Click" CommandArgument='<%# Eval("id") %>'><i class="fas fa-trash-alt"></i></asp:LinkButton>
                                                     </td>
                                                 </tr>
                                             </ItemTemplate>
@@ -488,6 +542,13 @@
                 <asp:LinkButton CssClass="btn btn-primary clientes-primary-btn" runat="server" ID="btnNuevoCliente" OnClick="btnNuevoCliente_Click"><i class="fas fa-plus"></i>&nbsp;Nuevo Cliente</asp:LinkButton>
             </div>
         </section>
+        <% if (Request.QueryString["guardado"] == "1") { %>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                alerta2('Ok', 'Cliente guardado correctamente.', 'success');
+            });
+        </script>
+        <% } %>
         <div class="clientes-divider"></div>
 
         <section class="clientes-table-wrap">
@@ -525,12 +586,12 @@
                                         <i class='fas <%# Convert.ToInt32(Eval("estado")) == 1 ? "fa-check-circle" : "fa-pause-circle" %>'></i>
                                         <%# Convert.ToInt32(Eval("estado")) == 1 ? "Activo" : "Inactivo" %>
                                     </span>
-                                    <asp:LinkButton runat="server" ID="btnEstado" CssClass="clientes-option clientes-option--toggle" ToolTip="Cambiar estado" OnClick="btnEstado_Click" CommandArgument='<%# Eval("id") %>'><i class="fas fa-sync-alt"></i></asp:LinkButton>
+                                    <asp:LinkButton runat="server" ID="btnEstado" CssClass="clientes-option clientes-option--toggle" ToolTip="Cambiar estado" OnClick="btnEstado_Click" CausesValidation="false" CommandArgument='<%# Eval("id") %>'><i class="fas fa-sync-alt"></i></asp:LinkButton>
                                 </td>
                                 <td class="col-1">
-                                    <asp:LinkButton runat="server" ID="btnAgregarDB" CssClass="clientes-option clientes-option--db" ToolTip="Agregar base de datos" OnClick="btnAgregarDB_Click" CommandArgument='<%# Eval("id") %>'><i class="fas fa-plus-circle"></i></asp:LinkButton>
-                                    <asp:LinkButton runat="server" ID="btnEditar" CssClass="clientes-option clientes-option--edit" ToolTip="Editar cliente" OnClick="btnEditar_Click" CommandArgument='<%# Eval("id") %>'><i class="fas fa-edit"></i></asp:LinkButton>
-                                    <asp:LinkButton runat="server" ID="btnEliminar" CssClass="clientes-option clientes-option--delete" ToolTip="Eliminar cliente" OnClick="btnEliminar_Click" CommandArgument='<%# Eval("id") %>'><i class="fas fa-trash-alt"></i></asp:LinkButton>
+                                    <asp:LinkButton runat="server" ID="btnAgregarDB" CssClass="clientes-option clientes-option--db" ToolTip="Agregar base de datos" OnClick="btnAgregarDB_Click" CausesValidation="false" CommandArgument='<%# Eval("id") %>'><i class="fas fa-plus-circle"></i></asp:LinkButton>
+                                    <asp:LinkButton runat="server" ID="btnEditar" CssClass="clientes-option clientes-option--edit" ToolTip="Editar cliente" OnClick="btnEditar_Click" CausesValidation="false" CommandArgument='<%# Eval("id") %>'><i class="fas fa-edit"></i></asp:LinkButton>
+                                    <asp:LinkButton runat="server" ID="btnEliminar" CssClass="clientes-option clientes-option--delete" ToolTip="Eliminar cliente" OnClick="btnEliminar_Click" CausesValidation="false" CommandArgument='<%# Eval("id") %>'><i class="fas fa-trash-alt"></i></asp:LinkButton>
                                 </td>
                             </tr>
                         </ItemTemplate>
@@ -541,5 +602,117 @@
     </div>
 
     <script src="js/myScripts.js"></script>
+    <script>
+        (function () {
+            function keepOnlyDigits(element) {
+                if (!element) return;
+                element.value = (element.value || '').replace(/\D/g, '');
+            }
+
+            function parseIsoDate(value) {
+                if (!value) return null;
+                var parts = value.split('-');
+                if (parts.length !== 3) return null;
+                var year = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1;
+                var day = parseInt(parts[2], 10);
+                var date = new Date(year, month, day);
+                return isNaN(date.getTime()) ? null : date;
+            }
+
+            function formatIsoDate(date) {
+                var year = date.getFullYear();
+                var month = String(date.getMonth() + 1).padStart(2, '0');
+                var day = String(date.getDate()).padStart(2, '0');
+                return year + '-' + month + '-' + day;
+            }
+
+            function daysInMonth(year, monthIndex) {
+                return new Date(year, monthIndex + 1, 0).getDate();
+            }
+
+            function adjustDay(year, monthIndex, day) {
+                var safeDay = Math.min(Math.max(day, 1), daysInMonth(year, monthIndex));
+                return new Date(year, monthIndex, safeDay);
+            }
+
+            function calculateFirstPayment(startDate, paymentDay) {
+                var calculated = adjustDay(startDate.getFullYear(), startDate.getMonth(), paymentDay);
+                if (calculated < startDate) {
+                    return adjustDay(startDate.getFullYear(), startDate.getMonth() + 1, paymentDay);
+                }
+
+                return calculated;
+            }
+
+            function calculateNextPayment() {
+                var tipoPlan = document.getElementById('<%= ddl_TipoPlan.ClientID %>');
+                var diaPago = document.getElementById('<%= txtDiaPago.ClientID %>');
+                var fechaInicio = document.getElementById('<%= txtFechaInicioPlan.ClientID %>');
+                var fechaProximoPago = document.getElementById('<%= txtFechaProximoPago.ClientID %>');
+
+                if (!tipoPlan || !diaPago || !fechaInicio || !fechaProximoPago) {
+                    return;
+                }
+
+                var paymentDay = parseInt(diaPago.value, 10);
+                var startDate = parseIsoDate(fechaInicio.value);
+                if (!startDate || isNaN(paymentDay) || paymentDay <= 0) {
+                    fechaProximoPago.value = '';
+                    return;
+                }
+
+                var selectedOption = tipoPlan.options[tipoPlan.selectedIndex];
+                var periodicidad = selectedOption ? parseInt(selectedOption.getAttribute('data-periodicidad') || '1', 10) : 1;
+                if (isNaN(periodicidad) || periodicidad <= 0) {
+                    periodicidad = 1;
+                }
+
+                var firstPayment = calculateFirstPayment(startDate, paymentDay);
+                var nextPayment = adjustDay(firstPayment.getFullYear(), firstPayment.getMonth() + periodicidad, paymentDay);
+
+                fechaProximoPago.value = formatIsoDate(nextPayment);
+            }
+
+            function wireNextPaymentCalculation() {
+                var ids = [
+                    '<%= ddl_TipoPlan.ClientID %>',
+                    '<%= txtDiaPago.ClientID %>',
+                    '<%= txtFechaInicioPlan.ClientID %>'
+                ];
+
+                ids.forEach(function (id) {
+                    var element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('change', calculateNextPayment);
+                        element.addEventListener('input', calculateNextPayment);
+                    }
+                });
+
+                calculateNextPayment();
+            }
+
+            function wireNitSanitizer() {
+                var nit = document.getElementById('<%= txtNit.ClientID %>');
+                if (!nit) {
+                    return;
+                }
+
+                nit.setAttribute('inputmode', 'numeric');
+                nit.setAttribute('autocomplete', 'off');
+                nit.setAttribute('placeholder', 'Solo numeros');
+                nit.addEventListener('input', function () {
+                    keepOnlyDigits(nit);
+                });
+                keepOnlyDigits(nit);
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                wireNextPaymentCalculation();
+                wireNitSanitizer();
+            });
+            window.calcularProximoPagoCliente = calculateNextPayment;
+        })();
+    </script>
 </asp:Content>
 

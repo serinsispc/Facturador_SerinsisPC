@@ -11,6 +11,9 @@ namespace App_WhatsApp
         public string messaging_product { get; set; }
         public List<Contacts> contacts { get; set; }
         public List<Messages> messages { get; set; }
+        public WhatsAppError error { get; set; }
+        public string errorMessage { get; set; }
+        public string rawResponse { get; set; }
     }
 
     public class Contacts
@@ -23,5 +26,14 @@ namespace App_WhatsApp
     {
         public string id { get; set; }
         public string message_status { get; set; }
+    }
+
+    public class WhatsAppError
+    {
+        public string message { get; set; }
+        public string type { get; set; }
+        public int code { get; set; }
+        public int error_subcode { get; set; }
+        public string fbtrace_id { get; set; }
     }
 }

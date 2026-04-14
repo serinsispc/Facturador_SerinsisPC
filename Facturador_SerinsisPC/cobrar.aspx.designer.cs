@@ -1,44 +1,24 @@
-﻿//------------------------------------------------------------------------------
-// <generado automáticamente>
-//     Este código fue generado por una herramienta.
-//
-//     Los cambios en este archivo podrían causar un comportamiento incorrecto y se perderán si
-//     se vuelve a generar el código. 
-// </generado automáticamente>
+//------------------------------------------------------------------------------
+// <generado automaticamente>
 //------------------------------------------------------------------------------
 
 namespace Facturador_SerinsisPC
 {
-
-
     public partial class cobrar
     {
-
-        /// <summary>
-        /// Control btnCobrar.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnCobrar;
-
-        /// <summary>
-        /// Control btnCargarDG.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnCargarDG;
-
-        /// <summary>
-        /// Control rpCobrosEnviados.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblResumenSaldoPendiente;
+        protected global::System.Web.UI.WebControls.Label lblResumenClientesConSaldo;
+        protected global::System.Web.UI.WebControls.Label lblResumenVencidos;
+        protected global::System.Web.UI.WebControls.TextBox txtFiltroCliente;
+        protected global::System.Web.UI.WebControls.DropDownList ddlFiltroPlan;
+        protected global::System.Web.UI.WebControls.DropDownList ddlFiltroSaldo;
+        protected global::System.Web.UI.WebControls.DropDownList ddlFiltroVencimiento;
+        protected global::System.Web.UI.WebControls.Repeater rpControlPagos;
+        protected global::System.Web.UI.WebControls.TextBox txtFiltroHistorial;
+        protected global::System.Web.UI.WebControls.DropDownList ddlFiltroPeriodoHistorial;
+        protected global::System.Web.UI.WebControls.LinkButton btnLimpiarFiltrosCobro;
         protected global::System.Web.UI.WebControls.Repeater rpCobrosEnviados;
     }
 }

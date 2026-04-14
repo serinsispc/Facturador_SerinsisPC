@@ -375,6 +375,12 @@
                         </a>
                     </li>
                     <li class="admin-nav__item">
+                        <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("ingresos.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="ingresos.aspx">
+                            <span class="admin-nav__icon"><i class="fas fa-chart-line"></i></span>
+                            <span>Ingresos</span>
+                        </a>
+                    </li>
+                    <li class="admin-nav__item">
                         <a class='admin-nav__link <%= Request.RawUrl != null && Request.RawUrl.IndexOf("notificaiones.aspx", StringComparison.OrdinalIgnoreCase) >= 0 ? "admin-nav__link--active" : string.Empty %>' href="notificaiones.aspx">
                             <span class="admin-nav__icon"><i class="fas fa-bell"></i></span>
                             <span>Notificaciones</span>
@@ -391,7 +397,7 @@
                         </div>
                     </div>
                     <div class="admin-user__actions">
-                        <a class="admin-user__action" href="#"><i class="far fa-id-badge"></i>&nbsp;Perfil</a>
+                        <a class="admin-user__action" href="perfil.aspx"><i class="far fa-id-badge"></i>&nbsp;Perfil</a>
                         <a class="admin-user__action" href="salir.aspx"><i class="fas fa-power-off"></i>&nbsp;Salir</a>
                     </div>
                 </div>

@@ -13,10 +13,7 @@ namespace App_WhatsApp
 {
     public class MetodosJSON
     {
-        readonly string Api_Prod = "https://graph.facebook.com/v22.0/627745297095871/messages";
-
-        //readonly string token;
-        readonly string urlEndPoint;
+        readonly string Api_Prod = "https://graph.facebook.com/v22.0";
 
 
         /// <summary>
@@ -27,9 +24,6 @@ namespace App_WhatsApp
         /// <param name="usedTest"></param>
         public MetodosJSON()
         {
-            //this.token = token;
-
-            this.urlEndPoint = Api_Prod;
         }
         public Task<string> HttpWebRequestPost(string Url, string Json, HttpMethod httpMethod, [Optional] string token)
         {
@@ -42,7 +36,7 @@ namespace App_WhatsApp
                 try
                 {
                     /// ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
-                    HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(urlEndPoint + Url);
+                    HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Api_Prod + Url);
 
                     httpWebRequest.ContentType = "application/json";
                     httpWebRequest.Accept = "application/json";
@@ -76,15 +70,27 @@ namespace App_WhatsApp
                 }
                 catch (WebException ex)
                 {
-                    var resp = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
-
-                    dynamic obj = JsonConvert.DeserializeObject(resp);
-                    var messageFromServer = obj.error.message;
+                    if (ex.Response != null)
+                    {
+                        using (StreamReader streamReader = new StreamReader(ex.Response.GetResponseStream()))
+                        {
+                            Response = streamReader.ReadToEnd();
+                        }
+                    }
+                    else
+                    {
+                        Response = JsonConvert.SerializeObject(new WhatsAppResponse
+                        {
+                            errorMessage = ex.Message
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
-                    string error = ex.Message;
-                    Response = null;
+                    Response = JsonConvert.SerializeObject(new WhatsAppResponse
+                    {
+                        errorMessage = ex.Message
+                    });
                 }
 
                 return Response;
@@ -96,19 +102,51 @@ namespace App_WhatsApp
         {
             try
             {
-                string urlParameter = "";
+                if (whatsapp == null ||
+                    string.IsNullOrWhiteSpace(whatsapp.token) ||
+                    string.IsNullOrWhiteSpace(whatsapp.phoneNumberId))
+                {
+                    return null;
+                }
+
+                string urlParameter = $"/{whatsapp.phoneNumberId}/messages";
 
                 string Json = JsonConvert.SerializeObject(whatsapp);
 
                 Json = Json.Replace("\"allowance_charges\":null,", "");
 
                 string Response = await HttpWebRequestPost(urlParameter, Json, HttpMethod.Post, whatsapp.token);
-                return JsonConvert.DeserializeObject<WhatsAppResponse>(Response);
+                if (string.IsNullOrWhiteSpace(Response))
+                {
+                    return new WhatsAppResponse
+                    {
+                        errorMessage = "Meta no devolvio respuesta."
+                    };
+                }
+
+                WhatsAppResponse resultado = JsonConvert.DeserializeObject<WhatsAppResponse>(Response);
+                if (resultado != null)
+                {
+                    resultado.rawResponse = Response;
+
+                    if (string.IsNullOrWhiteSpace(resultado.errorMessage) && resultado.error != null)
+                    {
+                        resultado.errorMessage = resultado.error.message;
+                    }
+                }
+
+                return resultado ?? new WhatsAppResponse
+                {
+                    errorMessage = "No fue posible interpretar la respuesta de Meta.",
+                    rawResponse = Response
+                };
             }
             catch (Exception ex)
             {
-                string error = ex.Message;
-                return null;
+                return new WhatsAppResponse
+                {
+                    errorMessage = ex.Message
+                };
             }
         }
     }

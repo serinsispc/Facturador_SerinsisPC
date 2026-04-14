@@ -1,16 +1,20 @@
-﻿using Facturador_SerinsisPC.Models.ViewModels;
+using Facturador_SerinsisPC.Models.ViewModels;
 using Facturador_SerinsisPC.Servicios;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Web;
 
 namespace Facturador_SerinsisPC.Models.Controlers
 {
     public class control_Facturas
     {
+        private static string SqlDateOrNull(DateTime? date)
+        {
+            return date.HasValue ? $"'{ClassDateTime.FormatoDate(date.Value)}'" : "null";
+        }
+
         public static RespuestaSQL Crud(Facturas facturas, int Boton)
         {
             try
@@ -22,12 +26,17 @@ namespace Facturador_SerinsisPC.Models.Controlers
                         $"'{ClassDateTime.FormatoDate(facturas.fechaFactura)}'," +
                         $"{facturas.idCliente}," +
                         $"{facturas.idMes}," +
-                        $"{facturas.valorPlan}," +
+                        $"{facturas.valorPlan.ToString(CultureInfo.InvariantCulture)}," +
                         $"{facturas.sedes}," +
-                        $"{facturas.valorAPagar}," +
+                        $"{facturas.valorAPagar.ToString(CultureInfo.InvariantCulture)}," +
                         $"{facturas.idEstado}," +
                         $"{facturas.contador}," +
-                        $"{facturas.yearFactura}";
+                        $"{facturas.yearFactura}," +
+                        $"{SqlDateOrNull(facturas.fechaVencimiento)}," +
+                        $"{SqlDateOrNull(facturas.periodoDesde)}," +
+                        $"{SqlDateOrNull(facturas.periodoHasta)}," +
+                        $"{facturas.saldoPendiente.ToString(CultureInfo.InvariantCulture)}," +
+                        $"{SqlDateOrNull(facturas.fechaPagoCompleto)}";
                 }
                 if (Boton == 1)
                 {
@@ -36,29 +45,34 @@ namespace Facturador_SerinsisPC.Models.Controlers
                         $"'{ClassDateTime.FormatoDate(facturas.fechaFactura)}'," +
                         $"{facturas.idCliente}," +
                         $"{facturas.idMes}," +
-                        $"{Convert.ToInt32(facturas.valorPlan)}," +
+                        $"{facturas.valorPlan.ToString(CultureInfo.InvariantCulture)}," +
                         $"{facturas.sedes}," +
-                        $"{Convert.ToInt32(facturas.valorAPagar)}," +
+                        $"{facturas.valorAPagar.ToString(CultureInfo.InvariantCulture)}," +
                         $"{facturas.idEstado}," +
                         $"{facturas.contador}," +
-                        $"{facturas.yearFactura}";
+                        $"{facturas.yearFactura}," +
+                        $"{SqlDateOrNull(facturas.fechaVencimiento)}," +
+                        $"{SqlDateOrNull(facturas.periodoDesde)}," +
+                        $"{SqlDateOrNull(facturas.periodoHasta)}," +
+                        $"{facturas.saldoPendiente.ToString(CultureInfo.InvariantCulture)}," +
+                        $"{SqlDateOrNull(facturas.fechaPagoCompleto)}";
                 }
                 if (Boton == 2)
                 {
                     query = $"exec Detale_Facturas {facturas.id}";
                 }
+
                 string respuesta = DBEntities.ConsultaSQLServer(DBEntities.connectionString, query);
-                RespuestaSQL respuestaSQL = new RespuestaSQL();
-                respuestaSQL = JsonConvert.DeserializeObject<List<RespuestaSQL>>(respuesta).FirstOrDefault();
-                return respuestaSQL;
+                return JsonConvert.DeserializeObject<List<RespuestaSQL>>(respuesta).FirstOrDefault();
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 string error = ex.Message;
                 return null;
             }
         }
-        public static Facturas ConsultarFactura(int idCliente,int idMes,int year)
+
+        public static Facturas ConsultarFactura(int idCliente, int idMes, int year)
         {
             try
             {
@@ -66,13 +80,14 @@ namespace Facturador_SerinsisPC.Models.Controlers
                 string respuesta = DBEntities.ConsultaSQLServer(DBEntities.connectionString, query);
                 return JsonConvert.DeserializeObject<List<Facturas>>(respuesta).FirstOrDefault();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                string error=ex.Message;
+                string error = ex.Message;
                 return null;
             }
         }
-        public static List<V_Facturas>Lista_Estado(int IdEstado)
+
+        public static List<V_Facturas> Lista_Estado(int IdEstado)
         {
             try
             {
@@ -80,12 +95,13 @@ namespace Facturador_SerinsisPC.Models.Controlers
                 string respuesta = DBEntities.ConsultaSQLServer(DBEntities.connectionString, query);
                 return JsonConvert.DeserializeObject<List<V_Facturas>>(respuesta);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                string error=ex.Message;
+                string error = ex.Message;
                 return null;
             }
         }
+
         public static Facturas Consultar_id(int idFactura)
         {
             try
@@ -100,6 +116,7 @@ namespace Facturador_SerinsisPC.Models.Controlers
                 return null;
             }
         }
+
         public static V_Facturas Consultar_id_vista(int idFactura)
         {
             try
@@ -114,11 +131,12 @@ namespace Facturador_SerinsisPC.Models.Controlers
                 return null;
             }
         }
-        public static List<V_Facturas>Lista()
+
+        public static List<V_Facturas> Lista()
         {
             try
             {
-                string query = $"select *from V_Facturas";
+                string query = "select *from V_Facturas";
                 string respuesta = DBEntities.ConsultaSQLServer(DBEntities.connectionString, query);
                 return JsonConvert.DeserializeObject<List<V_Facturas>>(respuesta);
             }

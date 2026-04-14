@@ -12,5 +12,6 @@ namespace Facturador_SerinsisPC.Models.ViewModels
         public int id { get; set; }
         [Required]
         public string nombrePlan { get; set; }
+        public int periodicidadMeses { get; set; }
     }
 }

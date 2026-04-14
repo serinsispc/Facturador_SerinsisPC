@@ -12,11 +12,15 @@ namespace App_WhatsApp.Plantillas
             string nombre_cliente,
             string fecha_pago,
             string valor_pagado,
-            string periodo_pagado)
+            string periodo_pagado,
+            string token,
+            string phoneNumberId)
         {
             MetodosJSON metodosJSON = new MetodosJSON();
 
             WhatsAppRequest whatsApp = new WhatsAppRequest();
+            whatsApp.token = token;
+            whatsApp.phoneNumberId = phoneNumberId;
             whatsApp.messaging_product = $"whatsapp";
             whatsApp.to = "57" + celular;
             whatsApp.type = $"template";
