@@ -41,13 +41,17 @@ namespace Facturador_SerinsisPC
             {
                 Session["month"] = Convert.ToInt32(ddl_Mes.SelectedItem.Value);
                 Session["year"] = txtyear.Text;
-                if (GestionarFactura((int)ViewState["idCliente"], Convert.ToInt32(ddl_Mes.SelectedItem.Value), Convert.ToInt32(txtyear.Text)))
+                RespuestaSQL resultado = GestionarFactura((int)ViewState["idCliente"], Convert.ToInt32(ddl_Mes.SelectedItem.Value), Convert.ToInt32(txtyear.Text));
+                if (resultado != null && resultado.respuesta)
                 {
                     Mensage(1, "Ok", "La factura fue gestionada correctamente.", "success", "facturar.aspx");
                 }
                 else
                 {
-                    Mensage(2, "Error", "La factura no fue gestionada correctamente.", "error", "");
+                    string detalle = resultado != null && !string.IsNullOrWhiteSpace(resultado.mensaje)
+                        ? resultado.mensaje
+                        : "La factura no fue gestionada correctamente.";
+                    Mensage(2, "Error", detalle, "error", "");
                 }
             }
             else
@@ -353,21 +357,57 @@ namespace Facturador_SerinsisPC
             }
         }
 
-        protected bool GestionarFactura(int idCliente, int idMes, int year)
+        protected RespuestaSQL GestionarFactura(int idCliente, int idMes, int year)
         {
+            if (idCliente <= 0)
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "Debes seleccionar un cliente valido." };
+            }
+
+            if (idMes <= 0)
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "Debes seleccionar un mes valido." };
+            }
+
             Facturas facturas = control_Facturas.ConsultarFactura(idCliente, idMes, year);
             if (facturas != null)
             {
-                return false;
+                return new RespuestaSQL { respuesta = false, mensaje = "Ya existe una factura para este cliente en el mes y anio seleccionados." };
             }
 
             V_Clientes cliente = control_Clientes.ConsultarIdCliente_vista(idCliente);
             if (cliente == null)
             {
-                return false;
+                return new RespuestaSQL { respuesta = false, mensaje = "No fue posible consultar la informacion del cliente." };
             }
 
-            DateTime fechaVencimiento = Convert.ToDateTime(txtFechaVencimientoFactura.Text);
+            if (cliente.sedes <= 0)
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "El cliente seleccionado tiene 0 sedes. Actualiza el cliente antes de facturar." };
+            }
+
+            if (cliente.valorPlan <= 0)
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "El cliente seleccionado no tiene un valor de plan valido." };
+            }
+
+            decimal valorAPagar;
+            if (!decimal.TryParse(txtValorAPagar.Text, out valorAPagar))
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "El valor a pagar no es valido." };
+            }
+
+            if (valorAPagar <= 0)
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "El valor a pagar debe ser mayor a cero." };
+            }
+
+            DateTime fechaVencimiento;
+            if (!DateTime.TryParse(txtFechaVencimientoFactura.Text, out fechaVencimiento))
+            {
+                return new RespuestaSQL { respuesta = false, mensaje = "La fecha de vencimiento no es valida." };
+            }
+
             int periodicidad = cliente.periodicidadMeses <= 0 ? 1 : cliente.periodicidadMeses;
             DateTime periodoHasta = fechaVencimiento;
             DateTime periodoDesde = fechaVencimiento.AddMonths(-periodicidad).AddDays(1);
@@ -380,19 +420,33 @@ namespace Facturador_SerinsisPC
                 idMes = idMes,
                 valorPlan = Convert.ToDecimal(txtValorPlan.Text),
                 sedes = Convert.ToInt32(txtSedes.Text),
-                valorAPagar = Convert.ToDecimal(txtValorAPagar.Text),
+                valorAPagar = valorAPagar,
                 idEstado = 1,
                 contador = periodicidad,
                 yearFactura = Convert.ToInt32(txtyear.Text),
                 fechaVencimiento = fechaVencimiento,
                 periodoDesde = periodoDesde,
                 periodoHasta = periodoHasta,
-                saldoPendiente = Convert.ToDecimal(txtValorAPagar.Text),
+                saldoPendiente = valorAPagar,
                 fechaPagoCompleto = null
             };
 
             RespuestaSQL respuesta = control_Facturas.Crud(facturas, 0);
-            return respuesta != null && respuesta.respuesta;
+            if (respuesta == null)
+            {
+                return new RespuestaSQL
+                {
+                    respuesta = false,
+                    mensaje = "No fue posible registrar la factura en la base de datos."
+                };
+            }
+
+            if (!respuesta.respuesta && string.IsNullOrWhiteSpace(respuesta.mensaje))
+            {
+                respuesta.mensaje = "La base de datos rechazo la factura. Verifica los datos del cliente y vuelve a intentar.";
+            }
+
+            return respuesta;
         }
 
         protected void ActualizarControlPagoCliente(Facturas factura, DateTime fechaPago)
@@ -417,7 +471,7 @@ namespace Facturador_SerinsisPC
                 ConfigWhatsAppMeta configMeta = control_ConfigWhatsAppMeta.Consultar();
                 if (configMeta == null ||
                     string.IsNullOrWhiteSpace(configMeta.accessToken) ||
-                    string.IsNullOrWhiteSpace(configMeta.phoneNumberId))
+                    (string.IsNullOrWhiteSpace(configMeta.urlMeta) && string.IsNullOrWhiteSpace(configMeta.phoneNumberId)))
                 {
                     return;
                 }
@@ -429,7 +483,8 @@ namespace Facturador_SerinsisPC
                     $"{factura.valorAPagar:N0}",
                     factura.nombreMes,
                     configMeta.accessToken,
-                    configMeta.phoneNumberId);
+                    configMeta.phoneNumberId,
+                    configMeta.urlMeta);
 
                 App_WhatsApp.Messages messages = appResponse?.messages?.FirstOrDefault();
                 string estado = messages?.message_status;

@@ -17,4 +17,10 @@ namespace Facturador_SerinsisPC.Models.ViewModels
         [Required]
         public int estado {  get; set; }
     }
+
+    public class EstadoBaseServidor
+    {
+        public string name { get; set; }
+        public string state_desc { get; set; }
+    }
 }

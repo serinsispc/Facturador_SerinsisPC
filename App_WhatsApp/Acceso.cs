@@ -10,5 +10,6 @@ namespace App_WhatsApp
     {
         public string token { get; set; }
         public string phoneNumberId { get; set; }
+        public string urlMeta { get; set; }
     }
 }

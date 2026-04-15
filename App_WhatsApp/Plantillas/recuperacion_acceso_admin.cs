@@ -11,13 +11,15 @@ namespace App_WhatsApp
             string codigo,
             string minutosVigencia,
             string token,
-            string phoneNumberId)
+            string phoneNumberId,
+            string urlMeta = null)
         {
             MetodosJSON metodosJSON = new MetodosJSON();
 
             WhatsAppRequest whatsApp = new WhatsAppRequest();
             whatsApp.token = token;
             whatsApp.phoneNumberId = phoneNumberId;
+            whatsApp.urlMeta = urlMeta;
             whatsApp.messaging_product = "whatsapp";
             whatsApp.to = "57" + celular;
             whatsApp.type = "template";

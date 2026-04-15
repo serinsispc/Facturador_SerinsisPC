@@ -24,7 +24,7 @@ namespace Facturador_SerinsisPC
             ConfigWhatsAppMeta configMeta = control_ConfigWhatsAppMeta.Consultar();
             if (configMeta == null ||
                 string.IsNullOrWhiteSpace(configMeta.accessToken) ||
-                string.IsNullOrWhiteSpace(configMeta.phoneNumberId))
+                (string.IsNullOrWhiteSpace(configMeta.urlMeta) && string.IsNullOrWhiteSpace(configMeta.phoneNumberId)))
             {
                 Mensage("Error", "No se encontro la configuracion de WhatsApp Meta.", "error");
                 return;
@@ -47,7 +47,8 @@ namespace Facturador_SerinsisPC
                         "901824648-7",
                         "SERINSIS SAS",
                         configMeta.accessToken,
-                        configMeta.phoneNumberId);
+                        configMeta.phoneNumberId,
+                        configMeta.urlMeta);
 
                     App_WhatsApp.Messages messages = appResponse?.messages?.FirstOrDefault();
                     if (messages != null && messages.message_status == "accepted")

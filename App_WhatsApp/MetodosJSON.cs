@@ -36,7 +36,8 @@ namespace App_WhatsApp
                 try
                 {
                     /// ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(delegate { return true; });
-                    HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Api_Prod + Url);
+                    string endpoint = ConstruirUrl(Url);
+                    HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(endpoint);
 
                     httpWebRequest.ContentType = "application/json";
                     httpWebRequest.Accept = "application/json";
@@ -98,22 +99,42 @@ namespace App_WhatsApp
             return task;
         }
 
+        private string ConstruirUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return Api_Prod;
+            }
+
+            if (Uri.TryCreate(url, UriKind.Absolute, out Uri absoluteUri))
+            {
+                return absoluteUri.ToString();
+            }
+
+            return Api_Prod.TrimEnd('/') + "/" + url.TrimStart('/');
+        }
+
         public async Task<WhatsAppResponse> WhatsApp_(WhatsAppRequest whatsapp)
         {
             try
             {
                 if (whatsapp == null ||
                     string.IsNullOrWhiteSpace(whatsapp.token) ||
-                    string.IsNullOrWhiteSpace(whatsapp.phoneNumberId))
+                    (string.IsNullOrWhiteSpace(whatsapp.urlMeta) &&
+                     string.IsNullOrWhiteSpace(whatsapp.phoneNumberId)))
                 {
                     return null;
                 }
 
-                string urlParameter = $"/{whatsapp.phoneNumberId}/messages";
+                string urlParameter = !string.IsNullOrWhiteSpace(whatsapp.urlMeta)
+                    ? whatsapp.urlMeta
+                    : $"/{whatsapp.phoneNumberId}/messages";
 
                 string Json = JsonConvert.SerializeObject(whatsapp);
 
                 Json = Json.Replace("\"allowance_charges\":null,", "");
+                Json = Json.Replace($"\"phoneNumberId\":\"{whatsapp.phoneNumberId}\",", "");
+                Json = Json.Replace($"\"urlMeta\":\"{whatsapp.urlMeta}\",", "");
 
                 string Response = await HttpWebRequestPost(urlParameter, Json, HttpMethod.Post, whatsapp.token);
                 if (string.IsNullOrWhiteSpace(Response))

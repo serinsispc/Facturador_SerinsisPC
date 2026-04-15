@@ -76,7 +76,7 @@ namespace Facturador_SerinsisPC
             ConfigWhatsAppMeta configMeta = control_ConfigWhatsAppMeta.Consultar();
             if (configMeta == null ||
                 string.IsNullOrWhiteSpace(configMeta.accessToken) ||
-                string.IsNullOrWhiteSpace(configMeta.phoneNumberId))
+                (string.IsNullOrWhiteSpace(configMeta.urlMeta) && string.IsNullOrWhiteSpace(configMeta.phoneNumberId)))
             {
                 control_UsuarioAdmin.RegistrarBitacora(usuario.id, usuario.loginUsuario, "RECUPERACION_CODIGO_FAIL", "No existe configuracion activa de WhatsApp Meta");
                 Mensage("Error", "No se encontro la configuracion de WhatsApp Meta para enviar el codigo.", "error");
@@ -95,7 +95,8 @@ namespace Facturador_SerinsisPC
                     usuario.whatsApp,
                     mensajeRecuperacion,
                     configMeta.accessToken,
-                    configMeta.phoneNumberId)
+                    configMeta.phoneNumberId,
+                    configMeta.urlMeta)
                 .GetAwaiter()
                 .GetResult();
 

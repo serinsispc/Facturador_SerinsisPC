@@ -36,5 +36,17 @@ namespace Facturador_SerinsisPC.Models
             string data = JsonConvert.SerializeObject(dataTable);
             return data;
         }
+
+        public static int EjecutarSQLServer(string connectionString, string query)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    return command.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }

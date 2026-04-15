@@ -9,6 +9,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Facturador_SerinsisPC
 {
@@ -204,17 +205,24 @@ namespace Facturador_SerinsisPC
                 }
 
                 int nuevoEstado = datBase.estado == 1 ? 0 : 1;
-                string queryUpdate = $"update DatBases set estado={nuevoEstado} where id={id}";
-                DBEntities.ConsultaSQLServer(DBEntities.connectionString, queryUpdate);
+                CambiarEstadoBaseServidor(datBase.nameDataBase, nuevoEstado == 1);
+                int estadoReal = ObtenerEstadoBaseServidor(datBase.nameDataBase);
+
+                string queryUpdate = $"update DatBases set estado={estadoReal} where id={id}";
+                DBEntities.EjecutarSQLServer(DBEntities.connectionString, queryUpdate);
 
                 int idCliente = Convert.ToInt32(ViewState["idClienteDB"]);
                 CargarModalDB(idCliente);
                 MostrarModalDB();
-                Mensage(2, "Ok", nuevoEstado == 1 ? "Base de datos marcada como online." : "Base de datos marcada como offline.", "success", "");
+                Mensage(2, "Ok", estadoReal == 1 ? "Base de datos marcada como online." : "Base de datos marcada como offline.", "success", "");
             }
             catch (Exception ex)
             {
                 Mensage(2, "Error", "No fue posible cambiar el estado de la base: " + ex.Message.Replace("'", ""), "error", "");
+            }
+            finally
+            {
+                ClassConexionPrincipal.Configurar();
             }
         }
         #endregion
@@ -294,6 +302,29 @@ namespace Facturador_SerinsisPC
         {
             string query = $"select *from DatBases where idCliente={idCliente}";
             List<DatBases> datBases = JsonConvert.DeserializeObject<List<DatBases>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query));
+
+            foreach (DatBases datBase in datBases ?? new List<DatBases>())
+            {
+                try
+                {
+                    int estadoReal = ObtenerEstadoBaseServidor(datBase.nameDataBase);
+                    if (datBase.estado != estadoReal)
+                    {
+                        datBase.estado = estadoReal;
+                        string queryUpdate = $"update DatBases set estado={estadoReal} where id={datBase.id}";
+                        DBEntities.EjecutarSQLServer(DBEntities.connectionString, queryUpdate);
+                    }
+                }
+                catch
+                {
+                    // Si no se puede consultar el servidor, mantenemos el ultimo estado conocido.
+                }
+                finally
+                {
+                    ClassConexionPrincipal.Configurar();
+                }
+            }
+
             rpDB_Cliente.DataSource = datBases;
             rpDB_Cliente.DataBind();
         }
@@ -454,6 +485,49 @@ namespace Facturador_SerinsisPC
             }
 
             throw new FormatException("La fecha de inicio del plan no tiene un formato valido.");
+        }
+
+        protected void CambiarEstadoBaseServidor(string nombreBase, bool activar)
+        {
+            string nombreSeguro = NormalizarNombreBase(nombreBase);
+            string accion = activar
+                ? $"ALTER DATABASE [{nombreSeguro}] SET ONLINE"
+                : $"ALTER DATABASE [{nombreSeguro}] SET OFFLINE WITH ROLLBACK IMMEDIATE";
+
+            DBEntities.ConexionBase("www.serinsispc.com", "master", "emilianop", "Ser1ns1s@2020*");
+            DBEntities.EjecutarSQLServer(DBEntities.connectionString, accion);
+        }
+
+        protected int ObtenerEstadoBaseServidor(string nombreBase)
+        {
+            string nombreSeguro = NormalizarNombreBase(nombreBase);
+            string query = "select name, state_desc from sys.databases where name='" + nombreSeguro + "'";
+
+            DBEntities.ConexionBase("www.serinsispc.com", "master", "emilianop", "Ser1ns1s@2020*");
+            List<EstadoBaseServidor> estados = JsonConvert.DeserializeObject<List<EstadoBaseServidor>>(DBEntities.ConsultaSQLServer(DBEntities.connectionString, query));
+            EstadoBaseServidor estado = estados.FirstOrDefault();
+            if (estado == null)
+            {
+                throw new InvalidOperationException("La base de datos no existe en el servidor.");
+            }
+
+            return string.Equals((estado.state_desc ?? string.Empty).Trim(), "ONLINE", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        }
+
+        protected string NormalizarNombreBase(string nombreBase)
+        {
+            string valor = (nombreBase ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(valor))
+            {
+                throw new InvalidOperationException("La base de datos no tiene un nombre valido.");
+            }
+
+            if (!Regex.IsMatch(valor, @"^[A-Za-z0-9_]+$"))
+            {
+                throw new InvalidOperationException("El nombre de la base de datos contiene caracteres no permitidos.");
+            }
+
+            return valor;
         }
         #endregion
     }

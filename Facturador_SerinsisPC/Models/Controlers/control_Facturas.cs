@@ -22,7 +22,13 @@ namespace Facturador_SerinsisPC.Models.Controlers
                 string query = string.Empty;
                 if (Boton == 0)
                 {
-                    query = $"exec InsertInto_Facturas " +
+                    query =
+                        "BEGIN TRY " +
+                        "SET NOCOUNT ON; " +
+                        "INSERT INTO dbo.Facturas " +
+                        "(fechaFactura, idCliente, idMes, valorPlan, sedes, valorAPagar, idEstado, contador, yearFactura, fechaVencimiento, periodoDesde, periodoHasta, saldoPendiente, fechaPagoCompleto) " +
+                        "VALUES " +
+                        "(" +
                         $"'{ClassDateTime.FormatoDate(facturas.fechaFactura)}'," +
                         $"{facturas.idCliente}," +
                         $"{facturas.idMes}," +
@@ -36,26 +42,42 @@ namespace Facturador_SerinsisPC.Models.Controlers
                         $"{SqlDateOrNull(facturas.periodoDesde)}," +
                         $"{SqlDateOrNull(facturas.periodoHasta)}," +
                         $"{facturas.saldoPendiente.ToString(CultureInfo.InvariantCulture)}," +
-                        $"{SqlDateOrNull(facturas.fechaPagoCompleto)}";
+                        $"{SqlDateOrNull(facturas.fechaPagoCompleto)}" +
+                        "); " +
+                        "SELECT CAST(1 AS bit) AS respuesta, CONVERT(INT, SCOPE_IDENTITY()) AS nuevoId, CAST('OK' AS VARCHAR(250)) AS mensaje; " +
+                        "END TRY " +
+                        "BEGIN CATCH " +
+                        "SELECT CAST(0 AS bit) AS respuesta, 0 AS nuevoId, ERROR_MESSAGE() AS mensaje; " +
+                        "END CATCH";
                 }
                 if (Boton == 1)
                 {
-                    query = $"exec Update_Facturas " +
-                        $"{facturas.id}," +
-                        $"'{ClassDateTime.FormatoDate(facturas.fechaFactura)}'," +
-                        $"{facturas.idCliente}," +
-                        $"{facturas.idMes}," +
-                        $"{facturas.valorPlan.ToString(CultureInfo.InvariantCulture)}," +
-                        $"{facturas.sedes}," +
-                        $"{facturas.valorAPagar.ToString(CultureInfo.InvariantCulture)}," +
-                        $"{facturas.idEstado}," +
-                        $"{facturas.contador}," +
-                        $"{facturas.yearFactura}," +
-                        $"{SqlDateOrNull(facturas.fechaVencimiento)}," +
-                        $"{SqlDateOrNull(facturas.periodoDesde)}," +
-                        $"{SqlDateOrNull(facturas.periodoHasta)}," +
-                        $"{facturas.saldoPendiente.ToString(CultureInfo.InvariantCulture)}," +
-                        $"{SqlDateOrNull(facturas.fechaPagoCompleto)}";
+                    query =
+                        "BEGIN TRY " +
+                        "SET NOCOUNT ON; " +
+                        "UPDATE dbo.Facturas SET " +
+                        $"fechaFactura = '{ClassDateTime.FormatoDate(facturas.fechaFactura)}', " +
+                        $"idCliente = {facturas.idCliente}, " +
+                        $"idMes = {facturas.idMes}, " +
+                        $"valorPlan = {facturas.valorPlan.ToString(CultureInfo.InvariantCulture)}, " +
+                        $"sedes = {facturas.sedes}, " +
+                        $"valorAPagar = {facturas.valorAPagar.ToString(CultureInfo.InvariantCulture)}, " +
+                        $"idEstado = {facturas.idEstado}, " +
+                        $"contador = {facturas.contador}, " +
+                        $"yearFactura = {facturas.yearFactura}, " +
+                        $"fechaVencimiento = {SqlDateOrNull(facturas.fechaVencimiento)}, " +
+                        $"periodoDesde = {SqlDateOrNull(facturas.periodoDesde)}, " +
+                        $"periodoHasta = {SqlDateOrNull(facturas.periodoHasta)}, " +
+                        $"saldoPendiente = {facturas.saldoPendiente.ToString(CultureInfo.InvariantCulture)}, " +
+                        $"fechaPagoCompleto = {SqlDateOrNull(facturas.fechaPagoCompleto)} " +
+                        $"WHERE id = {facturas.id}; " +
+                        "SELECT CAST(CASE WHEN @@ROWCOUNT > 0 THEN 1 ELSE 0 END AS bit) AS respuesta, " +
+                        $"{facturas.id} AS nuevoId, " +
+                        "CAST(CASE WHEN @@ROWCOUNT > 0 THEN 'OK' ELSE 'No se encontro la factura para actualizar.' END AS VARCHAR(250)) AS mensaje; " +
+                        "END TRY " +
+                        "BEGIN CATCH " +
+                        "SELECT CAST(0 AS bit) AS respuesta, 0 AS nuevoId, ERROR_MESSAGE() AS mensaje; " +
+                        "END CATCH";
                 }
                 if (Boton == 2)
                 {

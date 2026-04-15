@@ -707,11 +707,46 @@
                 keepOnlyDigits(nit);
             }
 
+            function filterClientDatabases() {
+                var filterInput = document.getElementById('txtFiltroDB');
+                var ddlDb = document.getElementById('<%= ddl_db.ClientID %>');
+
+                if (!filterInput || !ddlDb) {
+                    return;
+                }
+
+                if (!ddlDb._allOptions) {
+                    ddlDb._allOptions = Array.prototype.map.call(ddlDb.options, function (option) {
+                        return {
+                            value: option.value,
+                            text: option.text
+                        };
+                    });
+                }
+
+                var filter = (filterInput.value || '').toLowerCase().trim();
+                var filteredOptions = ddlDb._allOptions.filter(function (option) {
+                    return !filter || option.text.toLowerCase().indexOf(filter) >= 0;
+                });
+
+                ddlDb.options.length = 0;
+
+                filteredOptions.forEach(function (option) {
+                    ddlDb.options.add(new Option(option.text, option.value));
+                });
+
+                if (ddlDb.options.length > 0) {
+                    ddlDb.selectedIndex = 0;
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', function () {
                 wireNextPaymentCalculation();
                 wireNitSanitizer();
+                filterClientDatabases();
             });
             window.calcularProximoPagoCliente = calculateNextPayment;
+            window.filtrarBasesCliente = filterClientDatabases;
         })();
     </script>
 </asp:Content>
