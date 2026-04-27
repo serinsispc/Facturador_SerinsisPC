@@ -99,7 +99,6 @@ namespace Facturador_SerinsisPC
         {
             int id = Convert.ToInt32((sender as LinkButton).CommandArgument);
             ViewState["idCliente"] = id;
-            CargarCamposModals(id);
             OcultarModalCliente();
             if (GestionarCliente(2, id))
             {
@@ -430,6 +429,13 @@ namespace Facturador_SerinsisPC
                 idCliente = 0;
             }
 
+            if (boton == 2)
+            {
+                clientes.id = idCliente;
+                RespuestaSQL respuestaEliminar = control_Clientes.Crud(clientes, boton);
+                return respuestaEliminar != null && respuestaEliminar.respuesta;
+            }
+
             int diaPago = Convert.ToInt32(txtDiaPago.Text);
             DateTime fechaInicioPlan = ParseFechaFormulario(txtFechaInicioPlan.Text);
             DateTime? fechaUltimoPago = clientes.fechaUltimoPago;
@@ -466,6 +472,11 @@ namespace Facturador_SerinsisPC
 
         protected DateTime ParseFechaFormulario(string valor)
         {
+            if (string.IsNullOrWhiteSpace(valor))
+            {
+                throw new FormatException("La fecha de inicio del plan es obligatoria.");
+            }
+
             string[] formatos = { "yyyy-MM-dd", "dd/MM/yyyy", "d/M/yyyy", "MM/dd/yyyy", "M/d/yyyy" };
             DateTime fecha;
 
