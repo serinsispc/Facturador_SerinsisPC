@@ -1,0 +1,86 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject MensualidadesSerinsisPC.V2.Web.Services.AdminSessionService Session
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<LoadingOverlay />
+
+@if (!Session.IsAuthenticated)
+{
+    <AdminLoginCard />
+}
+else
+{
+    <div class="ms2-shell">
+        <aside class="ms2-sidebar">
+            <div class="ms2-brand">
+                <div class="ms2-brand__eyebrow">SERINSIS PC</div>
+                <div class="ms2-brand__title">Mensualidades V2</div>
+                <div class="ms2-brand__copy">Facturacion, cartera, servicio y automatizacion en una sola consola.</div>
+            </div>
+            <NavMenu />
+        </aside>
+
+        <main class="ms2-main">
+            <header class="ms2-topbar">
+                <div class="ms2-topbar__row">
+                    <div>
+                        <div class="ms2-topbar__label">Plataforma administrativa</div>
+                        <h1 class="ms2-topbar__title">Control central del servicio</h1>
+                    </div>
+                    <div class="ms2-userbox">
+                        <div>
+                            <strong>@Session.DisplayName</strong>
+                            <span>Administrador unico</span>
+                        </div>
+                        <button class="ms2-btn ms2-btn--ghost" @onclick="LogoutAsync">Salir</button>
+                    </div>
+                </div>
+            </header>
+
+            <section class="ms2-content">
+                @Body
+            </section>
+        </main>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        Session.StateChanged += HandleSessionChanged;
+    }
+
+    private async Task LogoutAsync()
+    {
+        bool confirmed = await Alerts.Confirm("Cerrar sesion", "Deseas salir del panel administrativo?", "Salir");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            Feedback.ShowLoading("Cerrando la sesion del administrador...");
+            await Session.LogoutAsync();
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private void HandleSessionChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Session.StateChanged -= HandleSessionChanged;
+    }
+}

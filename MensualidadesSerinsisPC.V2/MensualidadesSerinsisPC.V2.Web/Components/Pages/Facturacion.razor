@@ -1,0 +1,213 @@
+@page "/facturacion"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@inject IInvoiceOperationsService InvoiceOperationsService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Facturacion</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Facturacion</h2>
+            <p>Programa cobros, genera facturas y revisa el estado de las emisiones de la plataforma V2.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadDataAsync">Recargar</button>
+            <button class="ms2-btn ms2-btn--secondary" @onclick="QueueSchedulesAsync">Programar pendientes</button>
+            <button class="ms2-btn ms2-btn--primary" @onclick="GenerateInvoicesAsync">Generar facturas</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span>Facturas listadas</span>
+            <strong>@Invoices.Count</strong>
+        </article>
+        <article class="stat-card">
+            <span>Facturas pendientes</span>
+            <strong>@Invoices.Count(x => x.PendingAmount > 0)</strong>
+        </article>
+        <article class="stat-card">
+            <span>Programaciones</span>
+            <strong>@Schedules.Count</strong>
+        </article>
+        <article class="stat-card">
+            <span>Valor pendiente</span>
+            <strong>@Invoices.Sum(x => x.PendingAmount).ToString("C0")</strong>
+        </article>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Plan</th>
+                        <th>Periodo</th>
+                        <th>Vence</th>
+                        <th>Total</th>
+                        <th>Pendiente</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Invoices.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8">No hay facturas registradas todavia.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Invoices)
+                        {
+                            <tr>
+                                <td>@row.Id</td>
+                                <td>@row.CustomerName</td>
+                                <td>@row.PlanName</td>
+                                <td>@row.PeriodStart.ToString("yyyy-MM-dd")<br />@row.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                                <td>@row.DueDate.ToString("yyyy-MM-dd")</td>
+                                <td>@row.TotalAmount.ToString("C0")</td>
+                                <td>@row.PendingAmount.ToString("C0")</td>
+                                <td><span class="ms2-status @ResolveInvoiceCss(row.InvoiceStatusName)">@ResolveInvoiceLabel(row.InvoiceStatusName)</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>Programaciones</h3>
+                    <p>Estas son las programaciones que alimentan la generación automática de facturas.</p>
+                </div>
+            </div>
+
+            <div class="ms2-side-list">
+                @if (Schedules.Count == 0)
+                {
+                    <p class="ms2-empty-copy">No hay programaciones registradas todavia.</p>
+                }
+                else
+                {
+                    @foreach (var item in Schedules)
+                    {
+                        <article class="ms2-side-item">
+                            <strong>@item.CustomerName</strong>
+                            <span>@item.PlanName</span>
+                            <span>Fecha: @item.ScheduledDate.ToString("yyyy-MM-dd")</span>
+                            <span>Valor: @item.AmountToBill.ToString("C0")</span>
+                            <span>Estado: @item.ScheduleState</span>
+                            @if (item.InvoiceId.HasValue)
+                            {
+                                <span>Factura: #@item.InvoiceId</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(item.LastMessage))
+                            {
+                                <span>Nota: @item.LastMessage</span>
+                            }
+                        </article>
+                    }
+                }
+            </div>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private List<InvoiceListItemDto> Invoices { get; set; } = [];
+    private List<BillingScheduleListItemDto> Schedules { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando facturas y programaciones...");
+            Invoices = (await InvoiceOperationsService.GetInvoicesAsync()).ToList();
+            Schedules = (await InvoiceOperationsService.GetBillingSchedulesAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar facturacion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task QueueSchedulesAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Programando cobros pendientes...");
+            await InvoiceOperationsService.QueueDueBillingsAsync();
+            await LoadDataAsync();
+            await Alerts.Success("Programaciones actualizadas", "La agenda de facturacion fue recalculada correctamente.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible programar cobros", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task GenerateInvoicesAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Generando facturas automáticas...");
+            await InvoiceOperationsService.GenerateInvoicesDueTodayAsync();
+            await LoadDataAsync();
+            await Alerts.Success("Facturacion ejecutada", "Las facturas programadas fueron generadas correctamente.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible generar facturas", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private static string ResolveInvoiceCss(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "PAID" => "ms2-status--ok",
+            "PARTIAL" => "ms2-status--warn",
+            "OVERDUE" => "ms2-status--danger",
+            "ISSUED" => "ms2-status--warn",
+            _ => "ms2-status--ok"
+        };
+    }
+
+    private static string ResolveInvoiceLabel(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "DRAFT" => "Borrador",
+            "ISSUED" => "Emitida",
+            "PARTIAL" => "Parcial",
+            "PAID" => "Pagada",
+            "OVERDUE" => "Vencida",
+            "CANCELLED" => "Anulada",
+            _ => statusName
+        };
+    }
+}

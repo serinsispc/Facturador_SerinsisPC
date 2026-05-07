@@ -52,6 +52,60 @@ BEGIN
 END
 GO
 
+UPDATE dbo.Clientes
+SET estado = 1
+WHERE estado IS NULL;
+GO
+
+UPDATE dbo.Clientes
+SET diaPago = 5
+WHERE diaPago IS NULL
+   OR diaPago < 1
+   OR diaPago > 31;
+GO
+
+UPDATE dbo.Clientes
+SET fechaInicioPlan = ISNULL(fechaInicioPlan, ISNULL(fechaUltimoPago, ISNULL(fechaProximoPago, CAST(GETDATE() AS DATE))))
+WHERE fechaInicioPlan IS NULL;
+GO
+
+UPDATE dbo.Clientes
+SET fechaUltimoPago = fechaInicioPlan
+WHERE fechaUltimoPago IS NULL;
+GO
+
+UPDATE dbo.Clientes
+SET fechaProximoPago = DATEFROMPARTS
+(
+    YEAR(DATEADD(MONTH, 1, fechaUltimoPago)),
+    MONTH(DATEADD(MONTH, 1, fechaUltimoPago)),
+    CASE
+        WHEN diaPago > DAY(EOMONTH(DATEADD(MONTH, 1, fechaUltimoPago)))
+            THEN DAY(EOMONTH(DATEADD(MONTH, 1, fechaUltimoPago)))
+        ELSE diaPago
+    END
+)
+WHERE fechaProximoPago IS NULL;
+GO
+
+UPDATE dbo.Clientes
+SET observacionCartera = ''
+WHERE observacionCartera IS NULL;
+GO
+
+ALTER TABLE dbo.Clientes ALTER COLUMN estado INT NOT NULL;
+GO
+ALTER TABLE dbo.Clientes ALTER COLUMN diaPago TINYINT NOT NULL;
+GO
+ALTER TABLE dbo.Clientes ALTER COLUMN fechaInicioPlan DATE NOT NULL;
+GO
+ALTER TABLE dbo.Clientes ALTER COLUMN fechaUltimoPago DATE NOT NULL;
+GO
+ALTER TABLE dbo.Clientes ALTER COLUMN fechaProximoPago DATE NOT NULL;
+GO
+ALTER TABLE dbo.Clientes ALTER COLUMN observacionCartera VARCHAR(250) NOT NULL;
+GO
+
 IF COL_LENGTH('dbo.Facturas', 'fechaVencimiento') IS NULL ALTER TABLE dbo.Facturas ADD fechaVencimiento DATE NULL;
 GO
 IF COL_LENGTH('dbo.Facturas', 'periodoDesde') IS NULL ALTER TABLE dbo.Facturas ADD periodoDesde DATE NULL;
@@ -125,6 +179,23 @@ BEGIN
 
     ALTER TABLE dbo.PagoDetalleFactura
     ADD CONSTRAINT FK_PagoDetalleFactura_Facturas FOREIGN KEY (idFactura) REFERENCES dbo.Facturas(id);
+END
+GO
+
+IF COL_LENGTH('dbo.DatBases', 'estado') IS NOT NULL
+BEGIN
+    UPDATE dbo.DatBases
+    SET estado = 1
+    WHERE estado IS NULL;
+
+    ALTER TABLE dbo.DatBases ALTER COLUMN estado INT NOT NULL;
+END
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.default_constraints WHERE name = 'DF_DatBases_estado')
+BEGIN
+    ALTER TABLE dbo.DatBases
+    ADD CONSTRAINT DF_DatBases_estado DEFAULT (1) FOR estado;
 END
 GO
 
@@ -234,6 +305,89 @@ INNER JOIN dbo.Clientes c ON c.id = pr.idCliente
 INNER JOIN dbo.MetodoPago mp ON mp.id = pr.idMetodoPago;
 GO
 
+CREATE OR ALTER VIEW dbo.V_PagosAplicados
+AS
+SELECT
+    pr.id AS idPago,
+    pr.fechaPago,
+    pr.idCliente,
+    c.nombreComercial,
+    c.nombreRepresentate,
+    mp.nombreMetodo,
+    pr.valorRecibido,
+    pr.numeroComprobante,
+    f.id AS idFactura,
+    f.fechaFactura,
+    f.fechaVencimiento,
+    f.valorAPagar,
+    pdf.valorAplicado
+FROM dbo.PagosRecibidos pr
+INNER JOIN dbo.Clientes c ON c.id = pr.idCliente
+INNER JOIN dbo.MetodoPago mp ON mp.id = pr.idMetodoPago
+INNER JOIN dbo.PagoDetalleFactura pdf ON pdf.idPagoRecibido = pr.id
+INNER JOIN dbo.Facturas f ON f.id = pdf.idFactura;
+GO
+
+CREATE OR ALTER VIEW dbo.V_FacturacionMensual
+AS
+SELECT
+    yearFactura AS anio,
+    idMes AS mes,
+    COUNT(*) AS cantidadFacturas,
+    SUM(valorAPagar) AS totalFacturado,
+    SUM(saldoPendiente) AS saldoPendiente
+FROM dbo.Facturas
+GROUP BY yearFactura, idMes;
+GO
+
+CREATE OR ALTER VIEW dbo.V_CobroWhatsApp
+AS
+SELECT
+    c.id,
+    c.celular,
+    c.nombreComercial,
+    c.nombreRepresentate,
+    c.sedes,
+    c.valorPlan,
+    ISNULL(SUM(CASE WHEN f.idEstado <> 3 THEN f.contador ELSE 0 END), 0) AS mesesEnMora,
+    ISNULL(SUM(CASE WHEN f.idEstado <> 3 THEN f.saldoPendiente ELSE 0 END), 0) AS totalA_Pagar,
+    tp.nombrePlan
+FROM dbo.Clientes c
+INNER JOIN dbo.TipoPlan tp ON c.idTipoPlan = tp.id
+LEFT JOIN dbo.Facturas f ON f.idCliente = c.id
+GROUP BY
+    c.id, c.celular, c.nombreComercial, c.nombreRepresentate,
+    c.sedes, c.valorPlan, tp.nombrePlan;
+GO
+
+CREATE OR ALTER VIEW dbo.EstadoCuentaClientes
+AS
+SELECT
+    c.id,
+    c.nombreRepresentate,
+    c.nombreComercial,
+    c.celular,
+    ISNULL(SUM(CASE WHEN f.idEstado <> 3 THEN f.saldoPendiente ELSE 0 END), 0) AS total,
+    CASE
+        WHEN ISNULL(MAX(db.estado), 0) = 2 THEN 'Suspendido'
+        WHEN ISNULL(MAX(db.estado), 0) = 1 THEN 'Aviso'
+        ELSE 'Activo'
+    END AS estado
+FROM dbo.Clientes c
+LEFT JOIN dbo.Facturas f ON f.idCliente = c.id
+LEFT JOIN dbo.DatBases db ON db.idCliente = c.id
+GROUP BY
+    c.id, c.nombreRepresentate, c.nombreComercial, c.celular;
+GO
+
+CREATE OR ALTER VIEW dbo.ListaDB
+AS
+SELECT
+    database_id,
+    name
+FROM sys.databases;
+GO
+
 CREATE OR ALTER PROCEDURE dbo.InsertInto_Clientes
     @idTipoPlan INT,
     @nombreComercial VARCHAR(50),
@@ -244,11 +398,11 @@ CREATE OR ALTER PROCEDURE dbo.InsertInto_Clientes
     @valorPlan DECIMAL(18,2),
     @nit VARCHAR(10),
     @estado INT,
-    @diaPago TINYINT = NULL,
-    @fechaInicioPlan DATE = NULL,
-    @fechaUltimoPago DATE = NULL,
-    @fechaProximoPago DATE = NULL,
-    @observacionCartera VARCHAR(250) = NULL
+    @diaPago TINYINT,
+    @fechaInicioPlan DATE,
+    @fechaUltimoPago DATE,
+    @fechaProximoPago DATE,
+    @observacionCartera VARCHAR(250)
 AS
 BEGIN
     BEGIN TRY
@@ -283,11 +437,11 @@ CREATE OR ALTER PROCEDURE dbo.Update_Clientes
     @valorPlan DECIMAL(18,2),
     @nit VARCHAR(10),
     @estado INT,
-    @diaPago TINYINT = NULL,
-    @fechaInicioPlan DATE = NULL,
-    @fechaUltimoPago DATE = NULL,
-    @fechaProximoPago DATE = NULL,
-    @observacionCartera VARCHAR(250) = NULL
+    @diaPago TINYINT,
+    @fechaInicioPlan DATE,
+    @fechaUltimoPago DATE,
+    @fechaProximoPago DATE,
+    @observacionCartera VARCHAR(250)
 AS
 BEGIN
     BEGIN TRY
@@ -445,6 +599,23 @@ BEGIN
             fechaPagoCompleto = CASE WHEN saldoPendiente - @valorAplicado <= 0 THEN CAST(@fechaPago AS DATE) ELSE fechaPagoCompleto END,
             idEstado = CASE WHEN saldoPendiente - @valorAplicado <= 0 THEN 3 ELSE idEstado END
         WHERE id = @idFactura;
+
+        UPDATE c
+        SET
+            fechaUltimoPago = CAST(@fechaPago AS DATE),
+            fechaProximoPago = DATEFROMPARTS
+            (
+                YEAR(DATEADD(MONTH, CASE WHEN ISNULL(tp.periodicidadMeses, 0) <= 0 THEN 1 ELSE tp.periodicidadMeses END, CAST(@fechaPago AS DATE))),
+                MONTH(DATEADD(MONTH, CASE WHEN ISNULL(tp.periodicidadMeses, 0) <= 0 THEN 1 ELSE tp.periodicidadMeses END, CAST(@fechaPago AS DATE))),
+                CASE
+                    WHEN c.diaPago > DAY(EOMONTH(DATEADD(MONTH, CASE WHEN ISNULL(tp.periodicidadMeses, 0) <= 0 THEN 1 ELSE tp.periodicidadMeses END, CAST(@fechaPago AS DATE))))
+                        THEN DAY(EOMONTH(DATEADD(MONTH, CASE WHEN ISNULL(tp.periodicidadMeses, 0) <= 0 THEN 1 ELSE tp.periodicidadMeses END, CAST(@fechaPago AS DATE))))
+                    ELSE c.diaPago
+                END
+            )
+        FROM dbo.Clientes c
+        INNER JOIN dbo.TipoPlan tp ON tp.id = c.idTipoPlan
+        WHERE c.id = @idCliente;
 
         COMMIT TRANSACTION;
 

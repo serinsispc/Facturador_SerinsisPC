@@ -1,0 +1,358 @@
+@page "/clientes"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@inject ICustomerQueryService CustomerQueryService
+@inject ICustomerCommandService CustomerCommandService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Clientes</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Clientes</h2>
+            <p>Administra los datos fiscales, el contacto principal y el estado del servicio de cada cliente en la plataforma V2.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadCustomersAsync">Recargar</button>
+            <button class="ms2-btn ms2-btn--primary" @onclick="StartCreateAsync">Nuevo cliente</button>
+        </div>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Contacto</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                        <th>Proximo cobro</th>
+                        <th>Cartera</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Rows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8">No hay clientes cargados en la base V2 todavia.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Rows)
+                        {
+                            <tr>
+                                <td>@row.Id</td>
+                                <td>@row.CommercialName</td>
+                                <td>@row.ContactName<br />@row.PhoneNumber</td>
+                                <td>@row.Email</td>
+                                <td><span class="ms2-status @ResolveStatusCss(row.ServiceStatusName)">@ResolveStatusLabel(row.ServiceStatusName)</span></td>
+                                <td>@(row.NextBillingDate?.ToString("yyyy-MM-dd") ?? "Sin programar")</td>
+                                <td>@row.PendingAmount.ToString("C0")</td>
+                                <td>
+                                    <div class="ms2-table-actions">
+                                        <button class="ms2-icon-btn" @onclick="() => StartEditAsync(row.Id)">Editar</button>
+                                        <button class="ms2-icon-btn ms2-icon-btn--warn" @onclick="() => ChangeStatusAsync(row.Id, row.CommercialName, 1)">Aviso</button>
+                                        <button class="ms2-icon-btn ms2-icon-btn--danger" @onclick="() => ChangeStatusAsync(row.Id, row.CommercialName, 2)">Suspender</button>
+                                        <button class="ms2-icon-btn ms2-icon-btn--success" @onclick="() => ChangeStatusAsync(row.Id, row.CommercialName, 0)">Al dia</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>@(IsEditing ? "Editar cliente" : "Nuevo cliente")</h3>
+                    <p>@(IsEditing ? "Actualiza el maestro del cliente sin salir del listado." : "Crea clientes nuevos con sus datos base para empezar a operar.")</p>
+                </div>
+                @if (IsEditing || HasTypedData())
+                {
+                    <button class="ms2-btn ms2-btn--ghost" @onclick="ResetForm">Limpiar</button>
+                }
+            </div>
+
+            <EditForm EditContext="FormContext" FormName="clientes-form" OnValidSubmit="SaveCustomerAsync">
+                <DataAnnotationsValidator />
+
+                <div class="ms2-form-grid">
+                    <div class="ms2-field">
+                        <label>Documento</label>
+                        <InputText class="ms2-input" @bind-Value="Model.DocumentNumber" />
+                        <ValidationMessage For="() => Model.DocumentNumber" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Telefono</label>
+                        <InputText class="ms2-input" @bind-Value="Model.PhoneNumber" />
+                        <ValidationMessage For="() => Model.PhoneNumber" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Razon social</label>
+                        <InputText class="ms2-input" @bind-Value="Model.BusinessName" />
+                        <ValidationMessage For="() => Model.BusinessName" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Nombre comercial</label>
+                        <InputText class="ms2-input" @bind-Value="Model.CommercialName" />
+                        <ValidationMessage For="() => Model.CommercialName" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Contacto principal</label>
+                        <InputText class="ms2-input" @bind-Value="Model.ContactName" />
+                        <ValidationMessage For="() => Model.ContactName" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Correo</label>
+                        <InputText class="ms2-input" @bind-Value="Model.Email" />
+                        <ValidationMessage For="() => Model.Email" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Direccion</label>
+                        <InputText class="ms2-input" @bind-Value="Model.Address" />
+                        <ValidationMessage For="() => Model.Address" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Notas internas</label>
+                        <InputTextArea class="ms2-textarea" @bind-Value="Model.Notes" />
+                        <ValidationMessage For="() => Model.Notes" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label class="ms2-check">
+                            <InputCheckbox @bind-Value="Model.IsActive" />
+                            <span>Cliente activo para operacion comercial</span>
+                        </label>
+                    </div>
+                </div>
+
+                <ValidationSummary class="ms2-validation-summary" />
+
+                <div class="section-card__actions">
+                    <button type="submit" class="ms2-btn ms2-btn--primary">@(IsEditing ? "Guardar cambios" : "Crear cliente")</button>
+                    <button type="button" class="ms2-btn ms2-btn--secondary" @onclick="ResetForm">Cancelar</button>
+                </div>
+            </EditForm>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private readonly CustomerUpsertDto Model = new();
+    private EditContext FormContext = default!;
+    private List<CustomerListItemDto> Rows { get; set; } = [];
+    private bool IsEditing => Model.Id > 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormContext = new EditContext(Model);
+        await LoadCustomersAsync();
+    }
+
+    private async Task LoadCustomersAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando clientes de la nueva base de datos...");
+            Rows = (await CustomerQueryService.GetCustomersAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar clientes", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task StartCreateAsync()
+    {
+        ResetForm();
+        await Alerts.Info("Formulario listo", "Ya puedes crear un cliente nuevo desde este panel.");
+    }
+
+    private async Task StartEditAsync(int customerId)
+    {
+        try
+        {
+            Feedback.ShowLoading("Cargando cliente para edicion...");
+            var customer = await CustomerCommandService.GetCustomerForEditAsync(customerId);
+            if (customer is null)
+            {
+                await Alerts.Warning("Cliente no encontrado", "No fue posible cargar el registro solicitado.");
+                return;
+            }
+
+            ApplyModel(customer);
+            await Alerts.Info("Edicion habilitada", "El formulario lateral ya tiene cargado el cliente seleccionado.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al cargar cliente", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task SaveCustomerAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading(IsEditing ? "Guardando cambios del cliente..." : "Creando cliente en la base V2...");
+
+            if (IsEditing)
+            {
+                await CustomerCommandService.UpdateCustomerAsync(CloneModel());
+                await Alerts.Success("Cliente actualizado", "Los cambios quedaron guardados correctamente.");
+            }
+            else
+            {
+                int newId = await CustomerCommandService.CreateCustomerAsync(CloneModel());
+                await Alerts.Success("Cliente creado", $"El cliente fue registrado con el codigo {newId}.");
+            }
+
+            ResetForm();
+            await LoadCustomersAsync();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible guardar el cliente", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task ChangeStatusAsync(int customerId, string customerName, int serviceStatus)
+    {
+        string title = serviceStatus switch
+        {
+            0 => "Marcar cliente al dia",
+            1 => "Enviar a aviso",
+            2 => "Suspender cliente",
+            _ => "Actualizar estado"
+        };
+
+        string buttonText = serviceStatus switch
+        {
+            0 => "Confirmar",
+            1 => "Avisar",
+            2 => "Suspender",
+            _ => "Aceptar"
+        };
+
+        bool confirmed = await Alerts.Confirm(title, $"Deseas cambiar el estado de {customerName}?", buttonText);
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            Feedback.ShowLoading("Actualizando el estado del servicio del cliente...");
+            await CustomerCommandService.UpdateServiceStatusAsync(customerId, serviceStatus);
+            await LoadCustomersAsync();
+            await Alerts.Success("Estado actualizado", $"El cliente {customerName} ya refleja el nuevo estado de servicio.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible actualizar el estado", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private void ResetForm()
+    {
+        ApplyModel(new CustomerUpsertDto());
+    }
+
+    private void ApplyModel(CustomerUpsertDto source)
+    {
+        Model.Id = source.Id;
+        Model.DocumentNumber = source.DocumentNumber;
+        Model.BusinessName = source.BusinessName;
+        Model.CommercialName = source.CommercialName;
+        Model.ContactName = source.ContactName;
+        Model.PhoneNumber = source.PhoneNumber;
+        Model.Email = source.Email;
+        Model.Address = source.Address;
+        Model.Notes = source.Notes;
+        Model.IsActive = source.IsActive;
+        FormContext = new EditContext(Model);
+        StateHasChanged();
+    }
+
+    private CustomerUpsertDto CloneModel()
+    {
+        return new CustomerUpsertDto
+        {
+            Id = Model.Id,
+            DocumentNumber = Model.DocumentNumber,
+            BusinessName = Model.BusinessName,
+            CommercialName = Model.CommercialName,
+            ContactName = Model.ContactName,
+            PhoneNumber = Model.PhoneNumber,
+            Email = Model.Email,
+            Address = Model.Address,
+            Notes = Model.Notes,
+            IsActive = Model.IsActive
+        };
+    }
+
+    private bool HasTypedData()
+    {
+        return !string.IsNullOrWhiteSpace(Model.DocumentNumber)
+            || !string.IsNullOrWhiteSpace(Model.BusinessName)
+            || !string.IsNullOrWhiteSpace(Model.CommercialName)
+            || !string.IsNullOrWhiteSpace(Model.ContactName)
+            || !string.IsNullOrWhiteSpace(Model.PhoneNumber)
+            || !string.IsNullOrWhiteSpace(Model.Email)
+            || !string.IsNullOrWhiteSpace(Model.Address)
+            || !string.IsNullOrWhiteSpace(Model.Notes);
+    }
+
+    private static string ResolveStatusCss(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "ms2-status--ok",
+            "WARNING" => "ms2-status--warn",
+            "SUSPENDED" => "ms2-status--danger",
+            _ => "ms2-status--ok"
+        };
+    }
+
+    private static string ResolveStatusLabel(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "Al dia",
+            "WARNING" => "Aviso",
+            "SUSPENDED" => "Suspendido",
+            _ => statusName
+        };
+    }
+}

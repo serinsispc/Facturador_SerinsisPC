@@ -215,18 +215,13 @@ namespace Facturador_SerinsisPC
             string nombreCliente = (estadoCuenta.nombreRepresentate ?? string.Empty).Trim();
             string comercio = (estadoCuenta.nombreComercial ?? string.Empty).Trim();
             string saldo = $"{estadoCuenta.total:C0}";
-            string salto = Environment.NewLine + Environment.NewLine;
             string alcance = totalBases > 1
                 ? $"Esta medida aplica para las {totalBases} bases de datos asociadas a su cuenta."
                 : "Esta medida aplica para la base de datos asociada a su cuenta.";
 
             if (nuevoEstado == 1)
             {
-                return ConstruirMensajeEstructurado(
-                    nombreCliente,
-                    $"Desde SERINSIS PC S.A.S. le informamos que el establecimiento {comercio} presenta un saldo pendiente por {saldo} correspondiente al servicio de software POS.",
-                    $"Su cuenta ha sido registrada en estado de aviso preventivo. {alcance}",
-                    "Le agradecemos realizar el pago antes del día 5 del mes en curso en la cuenta de ahorros Bancolombia 454-000044-36 y enviar el comprobante de consignación únicamente al WhatsApp 3144628361.");
+                return ConstruirMensajeAvisoPreventivo(nombreCliente, comercio, saldo, alcance);
             }
 
             if (nuevoEstado == 2)
@@ -253,6 +248,25 @@ namespace Facturador_SerinsisPC
                 $"{parrafo1}{salto}" +
                 $"{parrafo2}{salto}" +
                 $"{parrafo3}";
+        }
+
+        protected string ConstruirMensajeAvisoPreventivo(string nombreCliente, string comercio, string saldo, string alcance)
+        {
+            string salto = Environment.NewLine;
+            string bloque = Environment.NewLine + Environment.NewLine;
+
+            return
+                $"RECORDATORIO DE PAGO{bloque}" +
+                $"Hola {nombreCliente}.{bloque}" +
+                $"Le informamos que el establecimiento {comercio} registra un saldo pendiente por {saldo} correspondiente al servicio de software POS.{bloque}" +
+                $"Su cuenta se encuentra en aviso preventivo. {alcance}{bloque}" +
+                $"Para evitar la suspension del servicio, por favor realice el pago antes del dia 5 del mes en curso.{bloque}" +
+                $"Datos para reportar el pago:{salto}" +
+                $"Cuenta Bancolombia: 454-000044-36{salto}" +
+                $"WhatsApp: 3144628361{salto}" +
+                $"Correo: info@serinsispc.com{bloque}" +
+                $"Si ya realizo el pago, por favor haga caso omiso a este mensaje.{bloque}" +
+                $"SERINSIS PC S.A.S.";
         }
 
         protected void MostrarResultadoCambio(int nuevoEstado, bool esMasivo, int clientesActualizados, int basesActualizadas)

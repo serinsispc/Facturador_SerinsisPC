@@ -10,6 +10,28 @@ namespace Facturador_SerinsisPC.Models.Controlers
 {
     public class control_Clientes
     {
+        private static void NormalizarCamposObligatorios(Clientes clientes)
+        {
+            int diaPago = ClassCartera.NormalizarDiaPago(clientes.diaPago);
+            DateTime fechaInicioPlan = ClassCartera.ResolverFechaInicioPlan(clientes.fechaInicioPlan, clientes.fechaUltimoPago, clientes.fechaProximoPago);
+            bool teniaUltimoPago = clientes.fechaUltimoPago.HasValue;
+            DateTime fechaUltimoPago = (clientes.fechaUltimoPago ?? fechaInicioPlan).Date;
+            DateTime fechaProximoPago = clientes.fechaProximoPago ?? (teniaUltimoPago
+                ? ClassCartera.CalcularProximaFechaPago(fechaUltimoPago, diaPago, 1)
+                : ClassCartera.CalcularProximoPagoInicial(fechaInicioPlan, diaPago, 1));
+
+            clientes.nombreComercial = clientes.nombreComercial ?? string.Empty;
+            clientes.nombreRepresentate = clientes.nombreRepresentate ?? string.Empty;
+            clientes.celular = clientes.celular ?? string.Empty;
+            clientes.correo = clientes.correo ?? string.Empty;
+            clientes.nit = clientes.nit ?? string.Empty;
+            clientes.observacionCartera = clientes.observacionCartera ?? string.Empty;
+            clientes.diaPago = diaPago;
+            clientes.fechaInicioPlan = fechaInicioPlan;
+            clientes.fechaUltimoPago = fechaUltimoPago;
+            clientes.fechaProximoPago = fechaProximoPago.Date;
+        }
+
         private static string EscapeSql(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Replace("'", "''");
@@ -24,6 +46,11 @@ namespace Facturador_SerinsisPC.Models.Controlers
         {
             try
             {
+                if (Boton != 2)
+                {
+                    NormalizarCamposObligatorios(clientes);
+                }
+
                 string query = string.Empty;
                 if (Boton == 0)
                 {
@@ -43,7 +70,7 @@ namespace Facturador_SerinsisPC.Models.Controlers
                         $"{clientes.valorPlan.ToString(CultureInfo.InvariantCulture)}," +
                         $"'{EscapeSql(clientes.nit)}'," +
                         $"{clientes.estado}," +
-                        $"{(clientes.diaPago.HasValue ? clientes.diaPago.Value.ToString() : "null")}," +
+                        $"{clientes.diaPago.Value}," +
                         $"{SqlDateOrNull(clientes.fechaInicioPlan)}," +
                         $"{SqlDateOrNull(clientes.fechaUltimoPago)}," +
                         $"{SqlDateOrNull(clientes.fechaProximoPago)}," +
@@ -70,7 +97,7 @@ namespace Facturador_SerinsisPC.Models.Controlers
                         $"valorPlan = {clientes.valorPlan.ToString(CultureInfo.InvariantCulture)}, " +
                         $"nit = '{EscapeSql(clientes.nit)}', " +
                         $"estado = {clientes.estado}, " +
-                        $"diaPago = {(clientes.diaPago.HasValue ? clientes.diaPago.Value.ToString() : "null")}, " +
+                        $"diaPago = {clientes.diaPago.Value}, " +
                         $"fechaInicioPlan = {SqlDateOrNull(clientes.fechaInicioPlan)}, " +
                         $"fechaUltimoPago = {SqlDateOrNull(clientes.fechaUltimoPago)}, " +
                         $"fechaProximoPago = {SqlDateOrNull(clientes.fechaProximoPago)}, " +

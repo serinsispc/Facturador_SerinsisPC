@@ -1,0 +1,132 @@
+@page "/ingresos"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@inject IIncomeReportingService IncomeReportingService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Ingresos</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Ingresos mensuales</h2>
+            <p>Consulta recaudo real, facturacion emitida y cartera pendiente consolidada por mes.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadDataAsync">Recargar</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span>Total ingresos listados</span>
+            <strong>@MonthlyIncome.Sum(x => x.TotalIncome).ToString("C0")</strong>
+        </article>
+        <article class="stat-card">
+            <span>Total facturado</span>
+            <strong>@PortfolioSummary.Sum(x => x.TotalBilled).ToString("C0")</strong>
+        </article>
+        <article class="stat-card">
+            <span>Cartera pendiente</span>
+            <strong>@PortfolioSummary.Sum(x => x.TotalPending).ToString("C0")</strong>
+        </article>
+        <article class="stat-card">
+            <span>Meses con ingresos</span>
+            <strong>@MonthlyIncome.Count</strong>
+        </article>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>Anio</th>
+                        <th>Mes</th>
+                        <th>Pagos</th>
+                        <th>Clientes pagaron</th>
+                        <th>Total ingresos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (MonthlyIncome.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5">No hay ingresos consolidados todavia.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in MonthlyIncome)
+                        {
+                            <tr>
+                                <td>@row.Year</td>
+                                <td>@row.Month</td>
+                                <td>@row.PaymentsCount</td>
+                                <td>@row.CustomersPaid</td>
+                                <td>@row.TotalIncome.ToString("C0")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>Cartera por mes</h3>
+                    <p>Resumen de facturacion emitida y saldo pendiente por periodo.</p>
+                </div>
+            </div>
+
+            <div class="ms2-side-list">
+                @if (PortfolioSummary.Count == 0)
+                {
+                    <p class="ms2-empty-copy">No hay datos de cartera consolidados todavia.</p>
+                }
+                else
+                {
+                    @foreach (var item in PortfolioSummary)
+                    {
+                        <article class="ms2-side-item">
+                            <strong>@item.Year - @item.Month</strong>
+                            <span>Facturas: @item.InvoicesCount</span>
+                            <span>Facturado: @item.TotalBilled.ToString("C0")</span>
+                            <span>Pendiente: @item.TotalPending.ToString("C0")</span>
+                        </article>
+                    }
+                }
+            </div>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private List<MonthlyIncomeRowDto> MonthlyIncome { get; set; } = [];
+    private List<PortfolioSummaryRowDto> PortfolioSummary { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando ingresos y cartera...");
+            MonthlyIncome = (await IncomeReportingService.GetMonthlyIncomeAsync()).ToList();
+            PortfolioSummary = (await IncomeReportingService.GetPortfolioSummaryAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar ingresos", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+}

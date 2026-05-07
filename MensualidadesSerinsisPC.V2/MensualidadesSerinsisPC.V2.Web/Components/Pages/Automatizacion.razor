@@ -1,0 +1,200 @@
+@page "/automatizacion"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@inject IAutomationOperationsService AutomationOperationsService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Automatizacion</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Automatizacion</h2>
+            <p>Orquesta facturacion diaria, avisos, suspension, reactivacion y revision de la cola de mensajes.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadDataAsync">Recargar</button>
+            <button class="ms2-btn ms2-btn--primary" @onclick="RunDailyAutomationAsync">Ejecutar proceso diario</button>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span>Procesos en bitacora</span>
+            <strong>@Logs.Count</strong>
+        </article>
+        <article class="stat-card">
+            <span>Notificaciones pendientes</span>
+            <strong>@PendingNotifications.Count</strong>
+        </article>
+        <article class="stat-card">
+            <span>Errores acumulados</span>
+            <strong>@Logs.Sum(x => x.ErrorCount)</strong>
+        </article>
+        <article class="stat-card">
+            <span>Procesados</span>
+            <strong>@Logs.Sum(x => x.ProcessedCount)</strong>
+        </article>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Proceso</th>
+                        <th>Fecha</th>
+                        <th>Procesados</th>
+                        <th>Exitosos</th>
+                        <th>Errores</th>
+                        <th>Detalle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Logs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7">No hay ejecuciones registradas todavia.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Logs)
+                        {
+                            <tr>
+                                <td>@row.Id</td>
+                                <td>@row.ProcessName</td>
+                                <td>@row.ExecutedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@row.ProcessedCount</td>
+                                <td>@row.SuccessfulCount</td>
+                                <td>@row.ErrorCount</td>
+                                <td>@row.Details</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>Cola de mensajes</h3>
+                    <p>Mensajes pendientes o con error que luego enviara tu integracion con WhatsApp o correo.</p>
+                </div>
+            </div>
+
+            <div class="ms2-side-list">
+                @if (PendingNotifications.Count == 0)
+                {
+                    <p class="ms2-empty-copy">No hay mensajes pendientes en este momento.</p>
+                }
+                else
+                {
+                    @foreach (var item in PendingNotifications)
+                    {
+                        <article class="ms2-side-item">
+                            <strong>@item.CommercialName</strong>
+                            <span>@item.Channel - @item.DeliveryStatus</span>
+                            <span>@item.Recipient</span>
+                            @if (!string.IsNullOrWhiteSpace(item.Subject))
+                            {
+                                <span>Asunto: @item.Subject</span>
+                            }
+                            <span>@item.MessageBody</span>
+                            <div class="ms2-table-actions">
+                                <button class="ms2-icon-btn ms2-icon-btn--success" @onclick="() => MarkAsSentAsync(item.Id)">Marcar enviado</button>
+                                <button class="ms2-icon-btn ms2-icon-btn--danger" @onclick="() => MarkAsErrorAsync(item.Id)">Marcar error</button>
+                            </div>
+                        </article>
+                    }
+                }
+            </div>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private List<AutomationLogItemDto> Logs { get; set; } = [];
+    private List<NotificationQueueItemDto> PendingNotifications { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando bitacora y cola de automatizacion...");
+            Logs = (await AutomationOperationsService.GetAutomationLogsAsync()).ToList();
+            PendingNotifications = (await AutomationOperationsService.GetPendingNotificationsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar automatizacion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task RunDailyAutomationAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Ejecutando automatizacion diaria completa...");
+            await AutomationOperationsService.RunFullDailyAutomationAsync();
+            await LoadDataAsync();
+            await Alerts.Success("Proceso ejecutado", "La automatizacion diaria termino correctamente.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible ejecutar la automatizacion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task MarkAsSentAsync(int notificationLogId)
+    {
+        try
+        {
+            Feedback.ShowLoading("Marcando notificacion como enviada...");
+            await AutomationOperationsService.MarkNotificationAsSentAsync(notificationLogId);
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible actualizar la notificacion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task MarkAsErrorAsync(int notificationLogId)
+    {
+        try
+        {
+            Feedback.ShowLoading("Marcando notificacion con error...");
+            await AutomationOperationsService.MarkNotificationAsErrorAsync(notificationLogId);
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible actualizar la notificacion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+}

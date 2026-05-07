@@ -248,6 +248,9 @@ namespace Facturador_SerinsisPC
 
         protected void LimpiarCamposModal()
         {
+            int diaPagoPredeterminado = ClassCartera.NormalizarDiaPago(null);
+            DateTime fechaInicioPredeterminada = DateTime.Today;
+
             lblEstadoGuardar.Text = string.Empty;
             lblEstadoGuardar.Visible = false;
             txtNit.Text = string.Empty;
@@ -257,9 +260,9 @@ namespace Facturador_SerinsisPC
             txtValor.Text = string.Empty;
             txtCorreo.Text = string.Empty;
             txtSedes.Text = string.Empty;
-            txtDiaPago.Text = "5";
-            txtFechaInicioPlan.Text = DateTime.Today.ToString("yyyy-MM-dd");
-            txtFechaProximoPago.Text = ClassCartera.CalcularPrimeraFechaPago(DateTime.Today, 5).ToString("yyyy-MM-dd");
+            txtDiaPago.Text = diaPagoPredeterminado.ToString();
+            txtFechaInicioPlan.Text = fechaInicioPredeterminada.ToString("yyyy-MM-dd");
+            txtFechaProximoPago.Text = ClassCartera.CalcularProximoPagoInicial(fechaInicioPredeterminada, diaPagoPredeterminado, 1).ToString("yyyy-MM-dd");
             txtObservacionCartera.Text = string.Empty;
         }
 
@@ -347,6 +350,16 @@ namespace Facturador_SerinsisPC
             V_Clientes vCliente = control_Clientes.ConsultarIdCliente_vista(idCliente);
             if (vCliente != null)
             {
+                int diaPago = ClassCartera.NormalizarDiaPago(vCliente.diaPago);
+                int periodicidadMeses = vCliente.periodicidadMeses <= 0 ? 1 : vCliente.periodicidadMeses;
+                DateTime fechaInicioPlan = ClassCartera.ResolverFechaInicioPlan(vCliente.fechaInicioPlan, vCliente.fechaUltimoPago, vCliente.fechaProximoPago);
+                DateTime fechaUltimoPago = (vCliente.fechaUltimoPago ?? fechaInicioPlan).Date;
+                DateTime fechaProximoPago = vCliente.fechaProximoPago.HasValue
+                    ? vCliente.fechaProximoPago.Value.Date
+                    : (vCliente.fechaUltimoPago.HasValue
+                        ? ClassCartera.CalcularProximaFechaPago(fechaUltimoPago, diaPago, periodicidadMeses)
+                        : ClassCartera.CalcularProximoPagoInicial(fechaInicioPlan, diaPago, periodicidadMeses));
+
                 lblEstadoGuardar.Text = string.Empty;
                 lblEstadoGuardar.Visible = false;
                 ddl_TipoPlan.SelectedValue = Convert.ToString(vCliente.idTipoPlan);
@@ -357,10 +370,10 @@ namespace Facturador_SerinsisPC
                 txtValor.Text = Convert.ToString(Convert.ToInt32(vCliente.valorPlan));
                 txtCorreo.Text = vCliente.correo;
                 txtSedes.Text = Convert.ToString(vCliente.sedes);
-                txtDiaPago.Text = Convert.ToString(vCliente.diaPago ?? 5);
-                txtFechaInicioPlan.Text = vCliente.fechaInicioPlan.HasValue ? vCliente.fechaInicioPlan.Value.ToString("yyyy-MM-dd") : string.Empty;
-                txtFechaProximoPago.Text = vCliente.fechaProximoPago.HasValue ? vCliente.fechaProximoPago.Value.ToString("yyyy-MM-dd") : string.Empty;
-                txtObservacionCartera.Text = vCliente.observacionCartera;
+                txtDiaPago.Text = diaPago.ToString();
+                txtFechaInicioPlan.Text = fechaInicioPlan.ToString("yyyy-MM-dd");
+                txtFechaProximoPago.Text = fechaProximoPago.ToString("yyyy-MM-dd");
+                txtObservacionCartera.Text = vCliente.observacionCartera ?? string.Empty;
                 btnGuardar.Text = "Editar";
                 MostrarModalCliente();
             }
@@ -436,12 +449,13 @@ namespace Facturador_SerinsisPC
                 return respuestaEliminar != null && respuestaEliminar.respuesta;
             }
 
-            int diaPago = Convert.ToInt32(txtDiaPago.Text);
+            int diaPago = ClassCartera.NormalizarDiaPago(Convert.ToInt32(txtDiaPago.Text));
             DateTime fechaInicioPlan = ParseFechaFormulario(txtFechaInicioPlan.Text);
-            DateTime? fechaUltimoPago = clientes.fechaUltimoPago;
+            bool teniaUltimoPago = clientes.fechaUltimoPago.HasValue;
+            DateTime fechaUltimoPago = (clientes.fechaUltimoPago ?? fechaInicioPlan).Date;
             int periodicidadMeses = ObtenerPeriodicidadPlan();
-            DateTime fechaProximoPago = fechaUltimoPago.HasValue
-                ? ClassCartera.CalcularProximaFechaPago(fechaUltimoPago.Value, diaPago, periodicidadMeses)
+            DateTime fechaProximoPago = teniaUltimoPago
+                ? ClassCartera.CalcularProximaFechaPago(fechaUltimoPago, diaPago, periodicidadMeses)
                 : ClassCartera.CalcularProximoPagoInicial(fechaInicioPlan, diaPago, periodicidadMeses);
 
             clientes.id = idCliente;
@@ -449,8 +463,8 @@ namespace Facturador_SerinsisPC
             clientes.nit = LimpiarSoloDigitos(txtNit.Text);
             clientes.nombreComercial = txtNombreComersial.Text.ToUpper();
             clientes.nombreRepresentate = txtRepresentante.Text.ToUpper();
-            clientes.celular = txtWhatSapp.Text;
-            clientes.correo = txtCorreo.Text;
+            clientes.celular = LimpiarSoloDigitos(txtWhatSapp.Text);
+            clientes.correo = txtCorreo.Text.Trim();
             clientes.sedes = Convert.ToInt32(txtSedes.Text);
             clientes.valorPlan = Convert.ToDecimal(txtValor.Text);
             clientes.estado = boton == 0 ? 1 : (clientes.estado == 0 ? 0 : 1);
@@ -458,7 +472,7 @@ namespace Facturador_SerinsisPC
             clientes.fechaInicioPlan = fechaInicioPlan;
             clientes.fechaUltimoPago = fechaUltimoPago;
             clientes.fechaProximoPago = fechaProximoPago;
-            clientes.observacionCartera = txtObservacionCartera.Text;
+            clientes.observacionCartera = txtObservacionCartera.Text ?? string.Empty;
             txtFechaProximoPago.Text = fechaProximoPago.ToString("yyyy-MM-dd");
 
             RespuestaSQL respuesta = control_Clientes.Crud(clientes, boton);

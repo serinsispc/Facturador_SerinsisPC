@@ -1,0 +1,63 @@
+@using MensualidadesSerinsisPC.V2.Web.Models
+@inject MensualidadesSerinsisPC.V2.Web.Services.AdminSessionService Session
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<section class="ms2-login-shell">
+    <div class="ms2-login-card">
+        <div class="ms2-login-kicker">SERINSIS PC</div>
+        <h2>Ingreso administrativo</h2>
+        <p>Usa el unico usuario habilitado para administrar clientes, suscripciones, facturas y estados del servicio.</p>
+
+        <EditForm Model="Model" FormName="admin-login-form" OnValidSubmit="LoginAsync">
+            <DataAnnotationsValidator />
+
+            <div class="ms2-form-grid">
+                <div class="ms2-field ms2-field--full">
+                    <label>Usuario</label>
+                    <InputText class="ms2-input" @bind-Value="Model.Username" />
+                    <ValidationMessage For="() => Model.Username" />
+                </div>
+
+                <div class="ms2-field ms2-field--full">
+                    <label>Clave</label>
+                    <InputText class="ms2-input" type="password" @bind-Value="Model.Password" />
+                    <ValidationMessage For="() => Model.Password" />
+                </div>
+            </div>
+
+            <div class="section-card__actions">
+                <button type="submit" class="ms2-btn ms2-btn--primary">Ingresar</button>
+            </div>
+        </EditForm>
+    </div>
+</section>
+
+@code {
+    private readonly AdminLoginDto Model = new();
+
+    private async Task LoginAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Validando acceso del administrador...");
+            bool success = await Session.LoginAsync(Model.Username, Model.Password);
+            if (!success)
+            {
+                await Alerts.Warning("Acceso denegado", "El usuario o la clave no coinciden con la configuracion del administrador.");
+                return;
+            }
+
+            Model.Password = string.Empty;
+            await Alerts.Success("Acceso concedido", $"Bienvenido {Session.DisplayName}.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible iniciar sesion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+}

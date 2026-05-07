@@ -1,0 +1,219 @@
+@page "/pagos"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@inject IPaymentOperationsService PaymentOperationsService
+@inject MensualidadesSerinsisPC.V2.Web.Services.AdminSessionService Session
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Pagos</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Pagos</h2>
+            <p>Registra pagos, cruza el recaudo contra las facturas y activa la reactivacion automática del servicio.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadDataAsync">Recargar</button>
+        </div>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Metodo</th>
+                        <th>Fecha</th>
+                        <th>Valor</th>
+                        <th>Comprobante</th>
+                        <th>Referencia</th>
+                        <th>Registrado por</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (RecentPayments.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8">Aun no hay pagos registrados.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in RecentPayments)
+                        {
+                            <tr>
+                                <td>@row.Id</td>
+                                <td>@row.CustomerName</td>
+                                <td>@row.PaymentMethodName</td>
+                                <td>@row.PaidAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@row.ReceivedAmount.ToString("C0")</td>
+                                <td>@row.ReceiptNumber</td>
+                                <td>@row.Reference</td>
+                                <td>@row.RegisteredBy</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>Registrar pago</h3>
+                    <p>Selecciona una factura pendiente y registra el pago para actualizar estado, cartera y reactivacion.</p>
+                </div>
+            </div>
+
+            <EditForm EditContext="FormContext" FormName="pagos-form" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="ms2-form-grid">
+                    <div class="ms2-field ms2-field--full">
+                        <label>Factura pendiente</label>
+                        <InputSelect class="ms2-input" @bind-Value="Model.InvoiceId">
+                            <option value="0">Selecciona una factura</option>
+                            @foreach (var option in PendingInvoices)
+                            {
+                                <option value="@option.Id">#@option.Id - @option.CustomerName - @option.PendingAmount.ToString("C0")</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.InvoiceId" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Metodo de pago</label>
+                        <InputSelect class="ms2-input" @bind-Value="Model.PaymentMethodId">
+                            <option value="0">Selecciona un metodo</option>
+                            @foreach (var option in PaymentMethods)
+                            {
+                                <option value="@option.Id">@option.Label</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.PaymentMethodId" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Fecha del pago</label>
+                        <InputDate class="ms2-input" @bind-Value="Model.PaidAt" />
+                        <ValidationMessage For="() => Model.PaidAt" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Valor recibido</label>
+                        <InputNumber class="ms2-input" @bind-Value="Model.ReceivedAmount" />
+                        <ValidationMessage For="() => Model.ReceivedAmount" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Numero comprobante</label>
+                        <InputText class="ms2-input" @bind-Value="Model.ReceiptNumber" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Referencia</label>
+                        <InputText class="ms2-input" @bind-Value="Model.Reference" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Observacion</label>
+                        <InputTextArea class="ms2-textarea" @bind-Value="Model.Notes" />
+                    </div>
+                </div>
+
+                <ValidationSummary class="ms2-validation-summary" />
+
+                <div class="section-card__actions">
+                    <button type="submit" class="ms2-btn ms2-btn--primary">Registrar pago</button>
+                    <button type="button" class="ms2-btn ms2-btn--secondary" @onclick="ResetForm">Limpiar</button>
+                </div>
+            </EditForm>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private readonly PaymentRegisterDto Model = new();
+    private EditContext FormContext = default!;
+    private List<LookupOptionDto> PaymentMethods { get; set; } = [];
+    private List<InvoiceListItemDto> PendingInvoices { get; set; } = [];
+    private List<PaymentReceiptListItemDto> RecentPayments { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormContext = new EditContext(Model);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando pagos, facturas pendientes y metodos...");
+            PaymentMethods = (await PaymentOperationsService.GetPaymentMethodOptionsAsync()).ToList();
+            PendingInvoices = (await PaymentOperationsService.GetPendingInvoicesAsync()).ToList();
+            RecentPayments = (await PaymentOperationsService.GetRecentPaymentsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar pagos", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Registrando pago y aplicando reactivacion...");
+            string registeredBy = string.IsNullOrWhiteSpace(Session.Username) ? "admin" : Session.Username;
+            await PaymentOperationsService.RegisterPaymentAsync(CloneModel(), registeredBy);
+            ResetForm();
+            await LoadDataAsync();
+            await Alerts.Success("Pago registrado", "El pago fue aplicado correctamente y el servicio se recalculo.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible registrar el pago", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private void ResetForm()
+    {
+        Model.InvoiceId = 0;
+        Model.PaymentMethodId = 0;
+        Model.PaidAt = DateTime.Now;
+        Model.ReceivedAmount = 0;
+        Model.ReceiptNumber = string.Empty;
+        Model.Reference = string.Empty;
+        Model.Notes = string.Empty;
+        FormContext = new EditContext(Model);
+        StateHasChanged();
+    }
+
+    private PaymentRegisterDto CloneModel()
+    {
+        return new PaymentRegisterDto
+        {
+            InvoiceId = Model.InvoiceId,
+            PaymentMethodId = Model.PaymentMethodId,
+            PaidAt = Model.PaidAt,
+            ReceivedAmount = Model.ReceivedAmount,
+            ReceiptNumber = Model.ReceiptNumber,
+            Reference = Model.Reference,
+            Notes = Model.Notes
+        };
+    }
+}

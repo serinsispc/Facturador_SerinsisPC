@@ -1,0 +1,335 @@
+@page "/bases-datos"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@inject ICustomerDatabaseService CustomerDatabaseService
+@inject ILookupCatalogService LookupCatalogService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Bases de Datos</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Bases de datos del cliente</h2>
+            <p>Relaciona de forma estricta cada base con su cliente y centraliza el mensaje que luego va a leer el POS.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadDataAsync">Recargar</button>
+            <button class="ms2-btn ms2-btn--primary" @onclick="StartCreateAsync">Nueva base</button>
+        </div>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Base</th>
+                        <th>Servidor</th>
+                        <th>Estado</th>
+                        <th>Motor</th>
+                        <th>Ultima sync</th>
+                        <th>Mensaje</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Rows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="9">No hay bases registradas todavia.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Rows)
+                        {
+                            <tr>
+                                <td>@row.Id</td>
+                                <td>@row.CustomerName</td>
+                                <td>@row.DatabaseName</td>
+                                <td>@row.ServerName</td>
+                                <td><span class="ms2-status @ResolveStatusCss(row.ServiceStatusName)">@ResolveStatusLabel(row.ServiceStatusName)</span></td>
+                                <td>@(row.IsOnline ? "Online" : "Offline")</td>
+                                <td>@row.LastSynchronizedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@row.CurrentMessage</td>
+                                <td>
+                                    <div class="ms2-table-actions">
+                                        <button class="ms2-icon-btn" @onclick="() => StartEditAsync(row.Id)">Editar</button>
+                                        <button class="ms2-icon-btn ms2-icon-btn--warn" @onclick="() => SyncStatusAsync(row.Id, row.DatabaseName, 1)">Aviso</button>
+                                        <button class="ms2-icon-btn ms2-icon-btn--danger" @onclick="() => SyncStatusAsync(row.Id, row.DatabaseName, 2)">Suspender</button>
+                                        <button class="ms2-icon-btn ms2-icon-btn--success" @onclick="() => SyncStatusAsync(row.Id, row.DatabaseName, 0)">Al dia</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>@(IsEditing ? "Editar base de datos" : "Nueva base de datos")</h3>
+                    <p>Esta relacion es la que el POS debe consultar para conocer el estado real del servicio.</p>
+                </div>
+                @if (IsEditing || HasTypedData())
+                {
+                    <button class="ms2-btn ms2-btn--ghost" @onclick="ResetForm">Limpiar</button>
+                }
+            </div>
+
+            <EditForm EditContext="FormContext" FormName="bases-datos-form" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="ms2-form-grid">
+                    <div class="ms2-field ms2-field--full">
+                        <label>Cliente</label>
+                        <InputSelect class="ms2-input" @bind-Value="Model.CustomerId">
+                            <option value="0">Selecciona un cliente</option>
+                            @foreach (var option in CustomerOptions)
+                            {
+                                <option value="@option.Id">@option.Label</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.CustomerId" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Nombre base</label>
+                        <InputText class="ms2-input" @bind-Value="Model.DatabaseName" />
+                        <ValidationMessage For="() => Model.DatabaseName" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Servidor</label>
+                        <InputText class="ms2-input" @bind-Value="Model.ServerName" />
+                        <ValidationMessage For="() => Model.ServerName" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Mensaje central</label>
+                        <InputTextArea class="ms2-textarea" @bind-Value="Model.CurrentMessage" />
+                        <ValidationMessage For="() => Model.CurrentMessage" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label class="ms2-check">
+                            <InputCheckbox @bind-Value="Model.IsOnline" />
+                            <span>Motor habilitado para operar</span>
+                        </label>
+                    </div>
+                </div>
+
+                <ValidationSummary class="ms2-validation-summary" />
+
+                <div class="section-card__actions">
+                    <button type="submit" class="ms2-btn ms2-btn--primary">@(IsEditing ? "Guardar cambios" : "Crear base")</button>
+                    <button type="button" class="ms2-btn ms2-btn--secondary" @onclick="ResetForm">Cancelar</button>
+                </div>
+            </EditForm>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private readonly CustomerDatabaseUpsertDto Model = new();
+    private EditContext FormContext = default!;
+    private List<CustomerDatabaseListItemDto> Rows { get; set; } = [];
+    private List<LookupOptionDto> CustomerOptions { get; set; } = [];
+    private bool IsEditing => Model.Id > 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormContext = new EditContext(Model);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando bases y clientes...");
+            Rows = (await CustomerDatabaseService.GetDatabasesAsync()).ToList();
+            CustomerOptions = (await LookupCatalogService.GetCustomerOptionsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar bases de datos", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task StartCreateAsync()
+    {
+        ResetForm();
+        if (CustomerOptions.Count == 0)
+        {
+            await Alerts.Warning("No hay clientes", "Debes crear al menos un cliente antes de registrar una base.");
+            return;
+        }
+
+        await Alerts.Info("Formulario listo", "Ya puedes registrar una base de datos para un cliente.");
+    }
+
+    private async Task StartEditAsync(int databaseId)
+    {
+        try
+        {
+            Feedback.ShowLoading("Cargando base de datos...");
+            var database = await CustomerDatabaseService.GetDatabaseForEditAsync(databaseId);
+            if (database is null)
+            {
+                await Alerts.Warning("Base no encontrada", "No se encontro el registro solicitado.");
+                return;
+            }
+
+            ApplyModel(database);
+            await Alerts.Info("Edicion habilitada", "La base de datos ya esta cargada en el formulario lateral.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al cargar base de datos", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading(IsEditing ? "Guardando cambios de la base..." : "Creando relacion cliente-base...");
+
+            if (IsEditing)
+            {
+                await CustomerDatabaseService.UpdateDatabaseAsync(CloneModel());
+                await Alerts.Success("Base actualizada", "Los cambios quedaron guardados correctamente.");
+            }
+            else
+            {
+                int newId = await CustomerDatabaseService.CreateDatabaseAsync(CloneModel());
+                await Alerts.Success("Base registrada", $"La base fue creada con el codigo {newId}.");
+            }
+
+            ResetForm();
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible guardar la base", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task SyncStatusAsync(int databaseId, string databaseName, int serviceStatus)
+    {
+        string title = serviceStatus switch
+        {
+            0 => "Marcar base al dia",
+            1 => "Enviar base a aviso",
+            2 => "Suspender base",
+            _ => "Sincronizar estado"
+        };
+
+        bool confirmed = await Alerts.Confirm(title, $"Deseas cambiar el estado de {databaseName}?", "Continuar");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            Feedback.ShowLoading("Sincronizando estado de la base de datos...");
+            await CustomerDatabaseService.SyncDatabaseStatusAsync(databaseId, serviceStatus);
+            await LoadDataAsync();
+            await Alerts.Success("Estado sincronizado", $"La base {databaseName} ya refleja el nuevo estado.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible sincronizar la base", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private void ResetForm()
+    {
+        ApplyModel(new CustomerDatabaseUpsertDto
+        {
+            IsOnline = true,
+            CurrentMessage = "SERVICIO ACTIVO Y AL DIA."
+        });
+    }
+
+    private void ApplyModel(CustomerDatabaseUpsertDto source)
+    {
+        Model.Id = source.Id;
+        Model.CustomerId = source.CustomerId;
+        Model.DatabaseName = source.DatabaseName;
+        Model.ServerName = source.ServerName;
+        Model.IsOnline = source.IsOnline;
+        Model.CurrentMessage = source.CurrentMessage;
+        FormContext = new EditContext(Model);
+        StateHasChanged();
+    }
+
+    private CustomerDatabaseUpsertDto CloneModel()
+    {
+        return new CustomerDatabaseUpsertDto
+        {
+            Id = Model.Id,
+            CustomerId = Model.CustomerId,
+            DatabaseName = Model.DatabaseName,
+            ServerName = Model.ServerName,
+            IsOnline = Model.IsOnline,
+            CurrentMessage = Model.CurrentMessage
+        };
+    }
+
+    private bool HasTypedData()
+    {
+        return Model.CustomerId > 0
+            || !string.IsNullOrWhiteSpace(Model.DatabaseName)
+            || !string.IsNullOrWhiteSpace(Model.ServerName)
+            || !string.IsNullOrWhiteSpace(Model.CurrentMessage)
+            || !Model.IsOnline;
+    }
+
+    private static string ResolveStatusCss(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "ms2-status--ok",
+            "WARNING" => "ms2-status--warn",
+            "SUSPENDED" => "ms2-status--danger",
+            _ => "ms2-status--ok"
+        };
+    }
+
+    private static string ResolveStatusLabel(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "Al dia",
+            "WARNING" => "Aviso",
+            "SUSPENDED" => "Suspendido",
+            _ => statusName
+        };
+    }
+}

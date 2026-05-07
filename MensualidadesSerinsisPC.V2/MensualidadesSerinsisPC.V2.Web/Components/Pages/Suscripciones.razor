@@ -1,0 +1,354 @@
+@page "/suscripciones"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@inject ISubscriptionService SubscriptionService
+@inject ILookupCatalogService LookupCatalogService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Suscripciones</PageTitle>
+
+<section class="section-card">
+    <div class="section-card__header">
+        <div>
+            <h2>Suscripciones</h2>
+            <p>Configura plan, periodicidad, dia de pago, proximo cobro, dias de gracia y automatismos de cada cliente.</p>
+        </div>
+        <div class="section-card__actions">
+            <button class="ms2-btn ms2-btn--secondary" @onclick="LoadDataAsync">Recargar</button>
+            <button class="ms2-btn ms2-btn--primary" @onclick="StartCreateAsync">Nueva suscripcion</button>
+        </div>
+    </div>
+
+    <div class="ms2-admin-grid">
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Cliente</th>
+                        <th>Plan</th>
+                        <th>Inicio</th>
+                        <th>Dia pago</th>
+                        <th>Proximo cobro</th>
+                        <th>Gracia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Rows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="9">No hay suscripciones registradas todavia.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Rows)
+                        {
+                            <tr>
+                                <td>@row.Id</td>
+                                <td>@row.CustomerName</td>
+                                <td>@row.PlanName<br /><small>@DescribePeriodicity(row.BillingPeriodMonths)</small></td>
+                                <td>@row.StartDate.ToString("yyyy-MM-dd")</td>
+                                <td>@row.PaymentDay</td>
+                                <td>@row.NextBillingDate.ToString("yyyy-MM-dd")</td>
+                                <td>@row.GraceDays dias</td>
+                                <td><span class="ms2-status @ResolveStatusCss(row.ServiceStatusName)">@ResolveStatusLabel(row.ServiceStatusName)</span></td>
+                                <td>
+                                    <button class="ms2-icon-btn" @onclick="() => StartEditAsync(row.Id)">Editar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="ms2-form-card">
+            <div class="ms2-form-card__header">
+                <div>
+                    <h3>@(IsEditing ? "Editar suscripcion" : "Nueva suscripcion")</h3>
+                    <p>Esta configuracion define como se facturara y cobrara automaticamente al cliente.</p>
+                </div>
+                @if (IsEditing || HasTypedData())
+                {
+                    <button class="ms2-btn ms2-btn--ghost" @onclick="ResetForm">Limpiar</button>
+                }
+            </div>
+
+            <EditForm EditContext="FormContext" FormName="suscripciones-form" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="ms2-form-grid">
+                    <div class="ms2-field ms2-field--full">
+                        <label>Cliente</label>
+                        <InputSelect class="ms2-input" @bind-Value="Model.CustomerId">
+                            <option value="0">Selecciona un cliente</option>
+                            @foreach (var option in CustomerOptions)
+                            {
+                                <option value="@option.Id">@option.Label</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.CustomerId" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label>Plan</label>
+                        <InputSelect class="ms2-input" @bind-Value="Model.ServicePlanId">
+                            <option value="0">Selecciona un plan</option>
+                            @foreach (var option in PlanOptions)
+                            {
+                                <option value="@option.Id">@option.Label</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.ServicePlanId" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Fecha inicio</label>
+                        <InputDate class="ms2-input" @bind-Value="Model.StartDate" />
+                        <ValidationMessage For="() => Model.StartDate" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Dia de pago</label>
+                        <InputNumber class="ms2-input" @bind-Value="Model.PaymentDay" />
+                        <ValidationMessage For="() => Model.PaymentDay" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Proximo cobro</label>
+                        <InputDate class="ms2-input" @bind-Value="Model.NextBillingDate" />
+                        <ValidationMessage For="() => Model.NextBillingDate" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Ultimo pago</label>
+                        <InputDate class="ms2-input" @bind-Value="Model.LastPaymentDate" />
+                    </div>
+
+                    <div class="ms2-field">
+                        <label>Dias de gracia</label>
+                        <InputNumber class="ms2-input" @bind-Value="Model.GraceDays" />
+                        <ValidationMessage For="() => Model.GraceDays" />
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label class="ms2-check">
+                            <InputCheckbox @bind-Value="Model.AutomaticBillingEnabled" />
+                            <span>Facturacion automatica habilitada</span>
+                        </label>
+                    </div>
+
+                    <div class="ms2-field ms2-field--full">
+                        <label class="ms2-check">
+                            <InputCheckbox @bind-Value="Model.AutomaticCollectionEnabled" />
+                            <span>Cobro automatico habilitado</span>
+                        </label>
+                    </div>
+                </div>
+
+                <ValidationSummary class="ms2-validation-summary" />
+
+                <div class="section-card__actions">
+                    <button type="submit" class="ms2-btn ms2-btn--primary">@(IsEditing ? "Guardar cambios" : "Crear suscripcion")</button>
+                    <button type="button" class="ms2-btn ms2-btn--secondary" @onclick="ResetForm">Cancelar</button>
+                </div>
+            </EditForm>
+        </aside>
+    </div>
+</section>
+
+@code {
+    private readonly SubscriptionUpsertDto Model = new();
+    private EditContext FormContext = default!;
+    private List<SubscriptionListItemDto> Rows { get; set; } = [];
+    private List<LookupOptionDto> CustomerOptions { get; set; } = [];
+    private List<LookupOptionDto> PlanOptions { get; set; } = [];
+    private bool IsEditing => Model.Id > 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        FormContext = new EditContext(Model);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando suscripciones y catalogos...");
+            Rows = (await SubscriptionService.GetSubscriptionsAsync()).ToList();
+            CustomerOptions = (await LookupCatalogService.GetCustomerOptionsAsync()).ToList();
+            PlanOptions = (await LookupCatalogService.GetServicePlanOptionsAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar suscripciones", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task StartCreateAsync()
+    {
+        ResetForm();
+        if (CustomerOptions.Count == 0 || PlanOptions.Count == 0)
+        {
+            await Alerts.Warning("Catalogos incompletos", "Necesitas al menos un cliente y un plan activo para crear una suscripcion.");
+            return;
+        }
+
+        await Alerts.Info("Formulario listo", "Ya puedes registrar una nueva suscripcion.");
+    }
+
+    private async Task StartEditAsync(int subscriptionId)
+    {
+        try
+        {
+            Feedback.ShowLoading("Cargando suscripcion...");
+            var subscription = await SubscriptionService.GetSubscriptionForEditAsync(subscriptionId);
+            if (subscription is null)
+            {
+                await Alerts.Warning("Suscripcion no encontrada", "No se encontro el registro seleccionado.");
+                return;
+            }
+
+            ApplyModel(subscription);
+            await Alerts.Info("Edicion habilitada", "La suscripcion ya esta cargada en el formulario lateral.");
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al cargar suscripcion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading(IsEditing ? "Guardando cambios de la suscripcion..." : "Creando suscripcion...");
+
+            if (IsEditing)
+            {
+                await SubscriptionService.UpdateSubscriptionAsync(CloneModel());
+                await Alerts.Success("Suscripcion actualizada", "Los cambios quedaron guardados correctamente.");
+            }
+            else
+            {
+                int newId = await SubscriptionService.CreateSubscriptionAsync(CloneModel());
+                await Alerts.Success("Suscripcion creada", $"La suscripcion fue registrada con el codigo {newId}.");
+            }
+
+            ResetForm();
+            await LoadDataAsync();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("No fue posible guardar la suscripcion", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private void ResetForm()
+    {
+        ApplyModel(new SubscriptionUpsertDto
+        {
+            StartDate = DateTime.Today,
+            NextBillingDate = DateTime.Today,
+            PaymentDay = 5,
+            GraceDays = 5,
+            AutomaticBillingEnabled = true,
+            AutomaticCollectionEnabled = true
+        });
+    }
+
+    private void ApplyModel(SubscriptionUpsertDto source)
+    {
+        Model.Id = source.Id;
+        Model.CustomerId = source.CustomerId;
+        Model.ServicePlanId = source.ServicePlanId;
+        Model.StartDate = source.StartDate;
+        Model.PaymentDay = source.PaymentDay;
+        Model.NextBillingDate = source.NextBillingDate;
+        Model.LastPaymentDate = source.LastPaymentDate;
+        Model.GraceDays = source.GraceDays;
+        Model.AutomaticBillingEnabled = source.AutomaticBillingEnabled;
+        Model.AutomaticCollectionEnabled = source.AutomaticCollectionEnabled;
+        FormContext = new EditContext(Model);
+        StateHasChanged();
+    }
+
+    private SubscriptionUpsertDto CloneModel()
+    {
+        return new SubscriptionUpsertDto
+        {
+            Id = Model.Id,
+            CustomerId = Model.CustomerId,
+            ServicePlanId = Model.ServicePlanId,
+            StartDate = Model.StartDate,
+            PaymentDay = Model.PaymentDay,
+            NextBillingDate = Model.NextBillingDate,
+            LastPaymentDate = Model.LastPaymentDate,
+            GraceDays = Model.GraceDays,
+            AutomaticBillingEnabled = Model.AutomaticBillingEnabled,
+            AutomaticCollectionEnabled = Model.AutomaticCollectionEnabled
+        };
+    }
+
+    private bool HasTypedData()
+    {
+        return Model.CustomerId > 0
+            || Model.ServicePlanId > 0
+            || Model.PaymentDay != 5
+            || Model.GraceDays != 5
+            || Model.StartDate != DateTime.Today
+            || Model.NextBillingDate != DateTime.Today
+            || Model.LastPaymentDate.HasValue;
+    }
+
+    private static string DescribePeriodicity(int months)
+    {
+        return months switch
+        {
+            1 => "Mensual",
+            6 => "Semestral",
+            12 => "Anual",
+            _ => $"{months} meses"
+        };
+    }
+
+    private static string ResolveStatusCss(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "ms2-status--ok",
+            "WARNING" => "ms2-status--warn",
+            "SUSPENDED" => "ms2-status--danger",
+            _ => "ms2-status--ok"
+        };
+    }
+
+    private static string ResolveStatusLabel(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "Al dia",
+            "WARNING" => "Aviso",
+            "SUSPENDED" => "Suspendido",
+            _ => statusName
+        };
+    }
+}

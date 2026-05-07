@@ -1,0 +1,191 @@
+@page "/"
+@using MensualidadesSerinsisPC.V2.Application.Abstractions
+@using MensualidadesSerinsisPC.V2.Application.DTOs
+@inject IDashboardService DashboardService
+@inject MensualidadesSerinsisPC.V2.Application.Services.SolutionBlueprintService BlueprintService
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+@inject MensualidadesSerinsisPC.V2.Web.Services.SweetAlertService Alerts
+
+<PageTitle>Resumen</PageTitle>
+
+@{
+    var modules = BlueprintService.GetModules();
+}
+
+<div class="hero-card">
+    <div class="hero-card__kicker">Nueva solucion independiente</div>
+    <h2>Base nueva, reglas claras y operacion automatica del servicio.</h2>
+    <p>Desde aqui puedes vigilar cartera, estados del servicio, facturacion del dia y la cola de notificaciones sin salir del panel principal.</p>
+</div>
+
+<div class="stats-grid">
+    <article class="stat-card">
+        <span>Clientes al dia</span>
+        <strong>@Overview.Summary.ActiveCustomers</strong>
+    </article>
+    <article class="stat-card">
+        <span>En aviso</span>
+        <strong>@Overview.Summary.WarningCustomers</strong>
+    </article>
+    <article class="stat-card">
+        <span>Suspendidos</span>
+        <strong>@Overview.Summary.SuspendedCustomers</strong>
+    </article>
+    <article class="stat-card">
+        <span>Ingresos del mes</span>
+        <strong>@Overview.Summary.CurrentMonthIncome.ToString("C0")</strong>
+    </article>
+</div>
+
+<div class="stats-grid">
+    <article class="stat-card">
+        <span>Cartera pendiente</span>
+        <strong>@Overview.Summary.PendingPortfolio.ToString("C0")</strong>
+    </article>
+    <article class="stat-card">
+        <span>Facturas pendientes</span>
+        <strong>@Overview.PendingInvoices</strong>
+    </article>
+    <article class="stat-card">
+        <span>Notificaciones pendientes</span>
+        <strong>@Overview.PendingNotifications</strong>
+    </article>
+    <article class="stat-card">
+        <span>Cobros programados hoy</span>
+        <strong>@Overview.ScheduledBillingsToday</strong>
+    </article>
+</div>
+
+<div class="ms2-admin-grid">
+    <section class="section-card">
+        <div class="section-card__header">
+            <div>
+                <h2>Clientes con cartera</h2>
+                <p>Los primeros registros que hoy concentran saldo pendiente o riesgo operativo.</p>
+            </div>
+            <div class="section-card__actions">
+                <button class="ms2-btn ms2-btn--secondary" @onclick="LoadOverviewAsync">Actualizar</button>
+            </div>
+        </div>
+
+        <div class="ms2-table-wrap">
+            <table class="ms2-table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Plan</th>
+                        <th>Vence</th>
+                        <th>Pendiente</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Overview.TopPendingCustomers.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5">No hay clientes con cartera pendiente en este momento.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var row in Overview.TopPendingCustomers)
+                        {
+                            <tr>
+                                <td>@row.CustomerName</td>
+                                <td>@row.PlanName</td>
+                                <td>@row.DueDate.ToString("yyyy-MM-dd")</td>
+                                <td>@row.PendingAmount.ToString("C0")</td>
+                                <td><span class="ms2-status @ResolveStatusCss(row.ServiceStatusName)">@ResolveStatusLabel(row.ServiceStatusName)</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <aside class="ms2-form-card">
+        <div class="ms2-form-card__header">
+            <div>
+                <h3>Cola de mensajes</h3>
+                <p>Vista rapida de mensajes que siguen pendientes o con error.</p>
+            </div>
+        </div>
+
+        <div class="ms2-side-list">
+            @if (Overview.NotificationQueuePreview.Count == 0)
+            {
+                <p class="ms2-empty-copy">No hay mensajes pendientes ahora mismo.</p>
+            }
+            else
+            {
+                @foreach (var item in Overview.NotificationQueuePreview)
+                {
+                    <article class="ms2-side-item">
+                        <strong>@item.CommercialName</strong>
+                        <span>@item.Channel - @item.DeliveryStatus</span>
+                        <span>@item.Recipient</span>
+                    </article>
+                }
+            }
+        </div>
+    </aside>
+</div>
+
+<div class="modules-grid">
+    @foreach (var module in modules)
+    {
+        <a class="module-card" href="@module.Route">
+            <h3>@module.Name</h3>
+            <p>@module.Description</p>
+        </a>
+    }
+</div>
+
+@code {
+    private DashboardOverviewDto Overview { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOverviewAsync();
+    }
+
+    private async Task LoadOverviewAsync()
+    {
+        try
+        {
+            Feedback.ShowLoading("Consultando resumen operativo...");
+            Overview = await DashboardService.GetOverviewAsync();
+        }
+        catch (Exception ex)
+        {
+            await Alerts.Error("Error al consultar el dashboard", ex.Message);
+        }
+        finally
+        {
+            Feedback.HideLoading();
+        }
+    }
+
+    private static string ResolveStatusCss(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "ms2-status--ok",
+            "WARNING" => "ms2-status--warn",
+            "SUSPENDED" => "ms2-status--danger",
+            _ => "ms2-status--ok"
+        };
+    }
+
+    private static string ResolveStatusLabel(string statusName)
+    {
+        return statusName.ToUpperInvariant() switch
+        {
+            "GOODSTANDING" => "Al dia",
+            "WARNING" => "Aviso",
+            "SUSPENDED" => "Suspendido",
+            _ => statusName
+        };
+    }
+}

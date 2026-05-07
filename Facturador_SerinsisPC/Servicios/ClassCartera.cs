@@ -4,10 +4,20 @@ namespace Facturador_SerinsisPC.Servicios
 {
     public static class ClassCartera
     {
+        public static int NormalizarDiaPago(int? diaPago)
+        {
+            return Math.Min(Math.Max(diaPago ?? 5, 1), 31);
+        }
+
         public static DateTime AjustarDiaPago(DateTime fechaBase, int diaPago)
         {
             int diaSeguro = Math.Min(Math.Max(diaPago, 1), DateTime.DaysInMonth(fechaBase.Year, fechaBase.Month));
             return new DateTime(fechaBase.Year, fechaBase.Month, diaSeguro);
+        }
+
+        public static DateTime ResolverFechaInicioPlan(DateTime? fechaInicioPlan, DateTime? fechaUltimoPago, DateTime? fechaProximoPago)
+        {
+            return (fechaInicioPlan ?? fechaUltimoPago ?? fechaProximoPago ?? DateTime.Today).Date;
         }
 
         public static DateTime CalcularPrimeraFechaPago(DateTime fechaInicioPlan, int diaPago)

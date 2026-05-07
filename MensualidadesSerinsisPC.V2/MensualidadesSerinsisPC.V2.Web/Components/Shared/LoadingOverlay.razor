@@ -1,0 +1,30 @@
+@implements IDisposable
+@inject MensualidadesSerinsisPC.V2.Web.Services.UiFeedbackService Feedback
+
+@if (Feedback.IsLoading)
+{
+    <div class="ms2-loading-backdrop">
+        <div class="ms2-loading-card">
+            <div class="ms2-loading-spinner"></div>
+            <div class="ms2-loading-title">Ejecutando proceso</div>
+            <div class="ms2-loading-message">@Feedback.LoadingMessage</div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        Feedback.OnChange += HandleChange;
+    }
+
+    private void HandleChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Feedback.OnChange -= HandleChange;
+    }
+}

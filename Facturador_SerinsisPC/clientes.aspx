@@ -563,6 +563,7 @@
                         <th class="col-1">WhatsApp</th>
                         <th class="col-1">Email</th>
                         <th class="col-1">Sedes</th>
+                        <th class="col-1">Dia Pago</th>
                         <th class="col-1">Valor Plan</th>
                         <th class="col-1">Estado</th>
                         <th class="col-1">Opciones</th>
@@ -580,6 +581,7 @@
                                 <td class="col-auto"><%# Eval("celular") %></td>
                                 <td class="col-auto"><%# Eval("correo") %></td>
                                 <td class="col-auto"><%# Eval("sedes") %></td>
+                                <td class="col-auto"><%# Eval("diaPago") ?? "-" %></td>
                                 <td class="col-auto"><%# $"{Eval("valorPlan"):C0}" %></td>
                                 <td class="col-auto">
                                     <span class='clientes-state <%# Convert.ToInt32(Eval("estado")) == 1 ? "clientes-state--activo" : "clientes-state--inactivo" %>'>
