@@ -28,10 +28,31 @@
         .cobrar-badge { display: inline-flex; align-items: center; gap: .45rem; padding: .35rem .6rem; border-radius: 999px; font-size: .84rem; font-weight: 700; }
         .cobrar-badge--ok { background: #ecfbf2; color: #1f9b53; }
         .cobrar-badge--warn { background: #fff7e7; color: #c98916; }
+        .cobrar-table-wrap { overflow-x: auto; }
         @media (max-width: 991.98px) {
+            .cobrar-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
             .cobrar-grid { grid-template-columns: 1fr; }
             .cobrar-summary-grid { grid-template-columns: 1fr; }
             .cobrar-filters, .cobrar-filters--history { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 767.98px) {
+            .cobrar-header__title {
+                font-size: 1.6rem;
+            }
+
+            .cobrar-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .cobrar-actions .btn {
+                width: 100%;
+            }
         }
     </style>
 </asp:Content>
@@ -98,32 +119,34 @@
                         </asp:DropDownList>
                     </div>
                 </div>
-                <table id="tablaControlPagos" class="table-cebra" style="width:100%;">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Plan</th>
-                            <th>Dia Pago</th>
-                            <th>Proximo Pago</th>
-                            <th>Saldo Pendiente</th>
-                            <th>Prox. Vencimiento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <asp:Repeater runat="server" ID="rpControlPagos">
-                            <ItemTemplate>
-                                <tr>
-                                    <td><%# Eval("nombreComercial") %></td>
-                                    <td><%# Eval("nombrePlan") %></td>
-                                    <td><%# Eval("diaPago") %></td>
-                                    <td><%# Eval("fechaProximoPago", "{0:yyyy-MM-dd}") %></td>
-                                    <td><span class='cobrar-badge <%# Convert.ToDecimal(Eval("saldoPendienteTotal")) > 0 ? "cobrar-badge--warn" : "cobrar-badge--ok" %>'><%# $"{Eval("saldoPendienteTotal"):C0}" %></span></td>
-                                    <td><%# Eval("proximoVencimiento", "{0:yyyy-MM-dd}") %></td>
-                                </tr>
-                            </ItemTemplate>
-                        </asp:Repeater>
-                    </tbody>
-                </table>
+                <div class="cobrar-table-wrap">
+                    <table id="tablaControlPagos" class="table-cebra" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Plan</th>
+                                <th>Dia Pago</th>
+                                <th>Proximo Pago</th>
+                                <th>Saldo Pendiente</th>
+                                <th>Prox. Vencimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <asp:Repeater runat="server" ID="rpControlPagos">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# Eval("nombreComercial") %></td>
+                                        <td><%# Eval("nombrePlan") %></td>
+                                        <td><%# Eval("diaPago") %></td>
+                                        <td><%# Eval("fechaProximoPago", "{0:yyyy-MM-dd}") %></td>
+                                        <td><span class='cobrar-badge <%# Convert.ToDecimal(Eval("saldoPendienteTotal")) > 0 ? "cobrar-badge--warn" : "cobrar-badge--ok" %>'><%# $"{Eval("saldoPendienteTotal"):C0}" %></span></td>
+                                        <td><%# Eval("proximoVencimiento", "{0:yyyy-MM-dd}") %></td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section class="cobrar-card">
@@ -147,34 +170,36 @@
                         <asp:LinkButton runat="server" ID="btnLimpiarFiltrosCobro" CssClass="btn cobrar-btn cobrar-btn--secondary w-100" OnClick="btnLimpiarFiltrosCobro_Click"><i class="fas fa-eraser"></i>&nbsp;Limpiar Filtros</asp:LinkButton>
                     </div>
                 </div>
-                <table id="tabla_cobrosEnviados" class="table-cebra" style="width:100%;">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Razon Social</th>
-                            <th>Representante</th>
-                            <th>WhatsApp</th>
-                            <th>Sedes</th>
-                            <th>Meses</th>
-                            <th>Valor Cobrado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <asp:Repeater runat="server" ID="rpCobrosEnviados">
-                            <ItemTemplate>
-                                <tr>
-                                    <td><%# Eval("fechaCobro", "{0:yyyy-MM-dd}") %></td>
-                                    <td><%# Eval("nombreComercial") %></td>
-                                    <td><%# Eval("nombreRepresentate") %></td>
-                                    <td><%# Eval("celular") %></td>
-                                    <td><%# Eval("sedesCobradas") %></td>
-                                    <td><%# Eval("mesesCobrados") %></td>
-                                    <td><%# $"{Eval("valotTotalCobrado"):C0}" %></td>
-                                </tr>
-                            </ItemTemplate>
-                        </asp:Repeater>
-                    </tbody>
-                </table>
+                <div class="cobrar-table-wrap">
+                    <table id="tabla_cobrosEnviados" class="table-cebra" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Razon Social</th>
+                                <th>Representante</th>
+                                <th>WhatsApp</th>
+                                <th>Sedes</th>
+                                <th>Meses</th>
+                                <th>Valor Cobrado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <asp:Repeater runat="server" ID="rpCobrosEnviados">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# Eval("fechaCobro", "{0:yyyy-MM-dd}") %></td>
+                                        <td><%# Eval("nombreComercial") %></td>
+                                        <td><%# Eval("nombreRepresentate") %></td>
+                                        <td><%# Eval("celular") %></td>
+                                        <td><%# Eval("sedesCobradas") %></td>
+                                        <td><%# Eval("mesesCobrados") %></td>
+                                        <td><%# $"{Eval("valotTotalCobrado"):C0}" %></td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </div>
     </div>

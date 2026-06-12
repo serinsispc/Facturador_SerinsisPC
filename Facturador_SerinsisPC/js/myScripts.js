@@ -22,6 +22,8 @@ $("#carruselServicios").on("slide.bs.carousel", function (e) {
 $('#tablaFacturas').dataTable({
     "lengthMenu": [10, 25, 50, 100],
     "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
     language: {
         "processing": "Procesando...",
         "lengthMenu": "Mostrar _MENU_ registros",
@@ -48,6 +50,8 @@ $('#tablaFacturas').dataTable({
 $('#tablaClientes').dataTable({
     "lengthMenu": [10, 25, 50, 100],
     "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
     language: {
         "processing": "Procesando...",
         "lengthMenu": "Mostrar _MENU_ registros",
@@ -200,6 +204,7 @@ $('#tablaDB_Clientes').dataTable({
         }
     }
 });
+
 
 
 

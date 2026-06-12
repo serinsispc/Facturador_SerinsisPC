@@ -59,10 +59,12 @@
             border-radius: 16px;
             padding: .3rem;
             box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05);
+            overflow-x: auto;
         }
 
         .clientes-table {
             width: 100%;
+            min-width: 1180px;
         }
 
         .clientes-table thead th {
@@ -176,6 +178,8 @@
         .clientes-modal .modal-body {
             background: #fbfdff;
             padding: 1rem;
+            max-height: 78vh;
+            overflow-y: auto;
         }
 
         .clientes-modal label {
@@ -306,6 +310,12 @@
             border: 1px solid #d7e5f3;
             border-radius: 16px;
             padding: .3rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .db-inline-table .table-cebra {
+            min-width: 560px;
         }
 
         .db-inline-state {
@@ -367,6 +377,35 @@
         }
 
         @media (max-width: 767.98px) {
+            .clientes-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .clientes-primary-btn {
+                width: 100%;
+            }
+
+            .clientes-header__title {
+                font-size: 1.6rem;
+            }
+
+            .clientes-option {
+                margin-bottom: .3rem;
+            }
+
+            .clientes-table {
+                min-width: 980px;
+            }
+
+            .clientes-modal .modal-footer {
+                flex-direction: column;
+            }
+
+            .clientes-modal .modal-footer .btn {
+                width: 100%;
+            }
+
             .clientes-page .Modal-padre {
                 padding: .55rem;
                 align-items: flex-start;
@@ -397,7 +436,7 @@
                                 <asp:LinkButton ID="btnCerrarModal1" runat="server" OnClick="btnCerrarModal1_Click"><i class="fas fa-times"></i></asp:LinkButton>
                             </button>
                         </div>
-                        <div class="modal-body" style="max-height: 600px; overflow-y: auto">
+                        <div class="modal-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <label>Tipo Plan</label>
@@ -474,7 +513,7 @@
                                 <asp:LinkButton ID="btnCerrarModalDB1" runat="server" OnClick="btnCerrarModalDB_Click"><i class="fas fa-times"></i></asp:LinkButton>
                             </button>
                         </div>
-                        <div class="modal-body" style="max-height: 78vh; overflow-y: auto">
+                        <div class="modal-body">
                             <span class="db-client-chip"><i class="fas fa-user-tie"></i> Cliente: <asp:Label runat="server" ID="lblClienteDB" /></span>
 
                             <section class="db-inline-card">

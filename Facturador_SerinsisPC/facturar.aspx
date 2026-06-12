@@ -12,7 +12,10 @@
         .facturar-divider { height: 1px; background: linear-gradient(90deg, #c9e3f5 0%, rgba(201, 227, 245, 0) 100%); }
         .facturar-card, .facturar-table-wrap { background: linear-gradient(135deg, #fbfdff 0%, #f3f9ff 100%); border: 1px solid #cfe2f3; border-radius: 16px; box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05); }
         .facturar-card { padding: .95rem 1rem; }
-        .facturar-table-wrap { padding: .3rem; }
+        .facturar-table-wrap { padding: .3rem; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+        .facturar-table-wrap .dataTables_wrapper { width: 100%; min-width: 100%; }
+        .facturar-table { width: 100% !important; min-width: 1080px; }
+        .facturar-table--compact { min-width: 760px; }
         .facturar-card__title { color: #2a22a6; font-weight: 700; font-size: .95rem; margin-bottom: .25rem; }
         .facturar-card__text { color: #61779c; font-size: .92rem; margin-bottom: .8rem; }
         .facturar-form label { color: #2a22a6; font-weight: 700; font-size: .88rem; margin-bottom: .3rem; }
@@ -47,13 +50,46 @@
         .facturar-table-filter { display: flex; align-items: center; gap: .55rem; }
         .facturar-table-filter label { margin: 0; color: #2a22a6; font-weight: 700; font-size: .88rem; }
         .facturar-table-filter select { min-width: 150px; min-height: 40px; border: 1px solid #cfe2f3; border-radius: 12px; color: #243a60; box-shadow: none; background: #ffffff; padding: .4rem .75rem; }
+        @media (max-width: 991.98px) {
+            .facturar-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .facturar-summary {
+                width: 100%;
+                align-items: flex-start;
+            }
+
+            .facturar-table {
+                min-width: 980px;
+            }
+        }
+
         @media (max-width: 767.98px) {
+            .facturar-header__title {
+                font-size: 1.6rem;
+            }
+
+            .facturar-search-btn,
+            .facturar-main-btn,
+            .facturar-modal .modal-footer .btn {
+                width: 100%;
+            }
+
+            .facturar-modal .modal-footer {
+                flex-direction: column;
+            }
+
             .facturar-page .Modal-padre { padding: .55rem; align-items: flex-start; overflow-y: auto; }
             .facturar-modal.modal-dialog { max-width: 100% !important; }
             .facturar-meta { grid-template-columns: 1fr; }
             .facturar-table-toolbar { justify-content: stretch; }
             .facturar-table-filter { width: 100%; flex-direction: column; align-items: stretch; }
             .facturar-table-filter select { width: 100%; }
+            .facturar-table-wrap { padding: .2rem; }
+            .facturar-table { min-width: 920px; }
+            .facturar-table--compact { min-width: 700px; }
         }
     </style>
 </asp:Content>
@@ -71,7 +107,7 @@
                         </div>
                         <div class="modal-body" style="overflow-y: auto">
                             <section class="facturar-table-wrap">
-                                <table id="tablaClientes" class="table-cebra" style="width:100%;">
+                                <table id="tablaClientes" class="table-cebra facturar-table facturar-table--compact" style="width:100%;">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -246,7 +282,7 @@
                     <asp:DropDownList runat="server" ID="ddlFiltroEstadoFacturas" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstadoFacturas_SelectedIndexChanged" />
                 </div>
             </div>
-            <table id="tablaFacturas" class="table-cebra">
+            <table id="tablaFacturas" class="table-cebra facturar-table">
                 <thead>
                     <tr>
                         <th>#</th>

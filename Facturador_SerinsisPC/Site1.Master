@@ -56,6 +56,10 @@
             display: flex;
         }
 
+        .admin-backdrop {
+            display: none;
+        }
+
         .admin-sidebar {
             width: 274px;
             flex: 0 0 274px;
@@ -257,6 +261,19 @@
             text-transform: uppercase;
         }
 
+        .admin-topbar__toggle {
+            border: 0;
+            background: rgba(255, 255, 255, 0.14);
+            color: #ffffff;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
         .admin-main {
             flex: 1;
             padding: 1rem 1rem 1.5rem;
@@ -304,18 +321,39 @@
             }
 
             .admin-sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
+                width: min(84vw, 320px);
+                height: 100vh;
+                position: fixed;
+                left: 0;
+                transform: translateX(-100%);
+                transition: transform .25s ease;
                 padding: .85rem;
-                border-bottom-left-radius: 20px;
-                border-bottom-right-radius: 20px;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 22px;
+                border-top-right-radius: 22px;
+                overflow-y: auto;
             }
 
             .admin-topbar {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+            }
+
+            body.admin-nav-open {
+                overflow: hidden;
+            }
+
+            body.admin-nav-open .admin-sidebar {
+                transform: translateX(0);
+            }
+
+            body.admin-nav-open .admin-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(16, 27, 55, 0.35);
+                z-index: 1029;
             }
 
             .admin-main {
@@ -331,6 +369,30 @@
                 padding: 0 .85rem .85rem;
             }
         }
+
+        @media (max-width: 767.98px) {
+            .admin-main {
+                padding: .75rem .65rem 1rem;
+            }
+
+            .admin-main .container-fluid {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .admin-footer {
+                padding: 0 .65rem .7rem;
+            }
+
+            .admin-footer__panel {
+                padding: .7rem .85rem;
+                gap: .55rem;
+            }
+
+            .admin-user__actions {
+                flex-direction: column;
+            }
+        }
     </style>
 
     <asp:ContentPlaceHolder ID="head" runat="server">
@@ -338,6 +400,7 @@
 </head>
 <body class="bg-light" style="font-family:'Bahnschrift'">
     <form id="form1" runat="server">
+        <div class="admin-backdrop" onclick="cerrarMenuAdmin()"></div>
         <div class="admin-shell">
             <aside class="admin-sidebar">
                 <a class="admin-brand" href="index.aspx">
@@ -405,6 +468,9 @@
 
             <div class="admin-content">
                 <div class="admin-topbar">
+                    <button type="button" class="admin-topbar__toggle" onclick="toggleMenuAdmin()" aria-label="Abrir menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
                     <div class="admin-topbar__brand">
                         <img src="img/logo.png" alt="SERINSIS PC" width="34" />
                         <span>SERINSIS PC</span>
@@ -438,6 +504,39 @@
         $("#menu-toggle").click(function (e) {
             e.preventDefault();
             $('#content-wrapper').toggleClass("toggled")
+        });
+
+        function toggleMenuAdmin() {
+            document.body.classList.toggle('admin-nav-open');
+        }
+
+        function cerrarMenuAdmin() {
+            document.body.classList.remove('admin-nav-open');
+        }
+
+        document.addEventListener('click', function (event) {
+            if (window.innerWidth > 991) {
+                return;
+            }
+
+            var sidebar = document.querySelector('.admin-sidebar');
+            var toggle = document.querySelector('.admin-topbar__toggle');
+            if (!sidebar || !document.body.classList.contains('admin-nav-open')) {
+                return;
+            }
+
+            var clickedInsideSidebar = sidebar.contains(event.target);
+            var clickedToggle = toggle && toggle.contains(event.target);
+
+            if (!clickedInsideSidebar && !clickedToggle) {
+                cerrarMenuAdmin();
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 991) {
+                cerrarMenuAdmin();
+            }
         });
     </script>
 </body>

@@ -155,6 +155,10 @@ namespace Facturador_SerinsisPC
                 return;
             }
 
+            bool cuentaActivada = ClassEstadoCuenta.ActivarCuentaCliente(
+                factura.idCliente,
+                "Su servicio ha sido reactivado automaticamente al confirmar el pago registrado.");
+
             Facturas facturaActualizada = control_Facturas.Consultar_id(idFactura);
             if (facturaActualizada != null && facturaActualizada.idEstado == 3)
             {
@@ -164,7 +168,9 @@ namespace Facturador_SerinsisPC
 
             Cargar_rpFacturas();
             panelModalPago.Visible = false;
-            Mensage(1, "Ok", "Pago registrado correctamente.", "success", "facturar.aspx");
+            Mensage(1, "Ok", cuentaActivada
+                ? "Pago registrado correctamente. La cuenta y sus bases de datos fueron activadas automaticamente."
+                : "Pago registrado correctamente, pero no fue posible activar automaticamente la cuenta. Verifica la pantalla de Cuentas.", "success", "facturar.aspx");
         }
 
         protected void btnEliminar_Click(object sender, EventArgs e)

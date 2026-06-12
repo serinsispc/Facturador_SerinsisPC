@@ -112,15 +112,19 @@ text-align:center;
 .Modal-padre {
     width: 100%;
     height: 100%;
-    background-color: rgba(255,255,255,.70);
-    
-    z-index: 200;
+    background-color: rgba(16, 27, 55, 0.28);
+    backdrop-filter: blur(3px);
+    z-index: 1200;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
+    overflow-y: auto;
+    padding: 1.25rem;
 }
 
 .Modal-mensage {
@@ -182,5 +186,12 @@ text-align:center;
         -ms-transform: scale(1.1); /* IE9 */
     }
 .borderDG{
-    border-radius:50px;
+  border-radius:50px;
+}
+
+@media (max-width: 767.98px) {
+    .Modal-padre {
+        align-items: flex-start;
+        padding: .55rem;
+    }
 }

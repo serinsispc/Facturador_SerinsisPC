@@ -152,6 +152,20 @@
             cursor: pointer;
         }
 
+        .cuentas-table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cuentas-table {
+            width: 100%;
+            min-width: 760px;
+        }
+
+        .cuentas-table td:last-child {
+            white-space: nowrap;
+        }
+
         .cuentas-page .container-fluid {
             padding-left: .2rem;
             padding-right: .2rem;
@@ -210,6 +224,46 @@
                 transform: rotate(360deg);
             }
         }
+
+        @media (max-width: 991.98px) {
+            .cuentas-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cuentas-toolbar__group {
+                flex-basis: 100%;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .cuentas-header__title {
+                font-size: 1.6rem;
+            }
+
+            .cuentas-panel,
+            .cuentas-toolbar__group {
+                padding: .85rem;
+            }
+
+            .cuentas-toolbar__actions {
+                flex-direction: column;
+            }
+
+            .cuentas-toolbar__actions .btn {
+                width: 100%;
+            }
+
+            .cuentas-legend {
+                flex-direction: column;
+            }
+
+            .cuentas-action {
+                width: 38px;
+                height: 38px;
+                margin-bottom: .25rem;
+            }
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -266,7 +320,8 @@
 
     <%-- Lista Facturas --%>
     <section class="table-container cuentas-panel" style="padding:.2rem; width:100%;">
-        <table id="tablaCuentas" class="table-cebra">
+        <div class="cuentas-table-wrap">
+        <table id="tablaCuentas" class="table-cebra cuentas-table">
             <thead>
                 <tr>
                     <th style="min-width: 40px;" class="sticky text-center">
@@ -305,6 +360,7 @@
                 </asp:Repeater>
             </tbody>
         </table>
+        </div>
     </section>
     </div>
 

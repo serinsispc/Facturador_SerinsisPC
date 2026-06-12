@@ -267,6 +267,7 @@
     <Compile Include="Servicios\ClassCartera.cs" />
     <Compile Include="Servicios\ClassConexionPrincipal.cs" />
     <Compile Include="Servicios\ClassDateTime.cs" />
+    <Compile Include="Servicios\ClassEstadoCuenta.cs" />
     <Compile Include="Servicios\ClassSeguridad.cs" />
     <Compile Include="Site1.Master.cs">
       <DependentUpon>Site1.Master</DependentUpon>

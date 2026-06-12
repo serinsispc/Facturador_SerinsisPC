@@ -10,14 +10,42 @@
         .ingresos-card { background: linear-gradient(135deg, #fbfdff 0%, #f3f9ff 100%); border: 1px solid #cfe2f3; border-radius: 16px; padding: .95rem 1rem; box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05); }
         .ingresos-card__title { color: #2a22a6; font-weight: 700; font-size: .95rem; margin-bottom: .25rem; }
         .ingresos-card__text { color: #61779c; font-size: .92rem; margin-bottom: .8rem; }
-        @media (max-width: 991.98px) { .ingresos-grid { grid-template-columns: 1fr; } }
+        .ingresos-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .ingresos-table-wrap .table-cebra { min-width: 560px; }
+        .pagos-gestion-card { background: linear-gradient(135deg, #fbfdff 0%, #f3f9ff 100%); border: 1px solid #cfe2f3; border-radius: 16px; padding: .95rem 1rem; box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05); }
+        .pagos-filters { display: grid; grid-template-columns: minmax(220px, 1.2fr) minmax(180px, .7fr) minmax(180px, .7fr) auto; gap: .75rem; margin-bottom: .95rem; }
+        .pagos-filter label { display: block; color: #2a22a6; font-weight: 700; font-size: .84rem; margin-bottom: .28rem; }
+        .pagos-filter .form-control { min-height: 40px; border: 1px solid #cfe2f3; border-radius: 12px; color: #243a60; box-shadow: none; }
+        .pagos-filter .form-control:focus { border-color: #62afe2; box-shadow: 0 0 0 .16rem rgba(98, 175, 226, 0.18); }
+        .pagos-filter-actions { display: flex; align-items: end; }
+        .pagos-action { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 11px; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+        .pagos-action:hover { text-decoration: none; transform: translateY(-1px); box-shadow: 0 8px 16px rgba(42, 34, 166, 0.10); }
+        .pagos-action--delete { background: #fff0f2; color: #d8344a; }
+        .pagos-empty { color: #61779c; font-size: .92rem; margin: .4rem 0 0; }
+        @media (max-width: 991.98px) {
+            .ingresos-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .ingresos-grid { grid-template-columns: 1fr; }
+            .pagos-filters { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 767.98px) {
+            .ingresos-header__title {
+                font-size: 1.6rem;
+            }
+
+            .pagos-filters { grid-template-columns: 1fr; }
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div class="ingresos-page">
         <section class="container-fluid">
             <div class="ingresos-header">
-                <h1 class="ingresos-header__title"><i class="fas fa-chart-line"></i> Ingresos</h1>
+                <h1 class="ingresos-header__title"><i class="fas fa-chart-line"></i> Ingresos y Pagos</h1>
             </div>
         </section>
         <div class="ingresos-divider"></div>
@@ -26,61 +54,132 @@
             <section class="ingresos-card">
                 <div class="ingresos-card__title">Ingresos por mes</div>
                 <p class="ingresos-card__text">Resumen del dinero realmente recibido, agrupado por anio y mes.</p>
-                <table id="tablaIngresosMensuales" class="table-cebra" style="width:100%;">
-                    <thead>
-                        <tr>
-                            <th>Anio</th>
-                            <th>Mes</th>
-                            <th>Cantidad Pagos</th>
-                            <th>Total Ingresos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <asp:Repeater runat="server" ID="rpIngresosMensuales">
-                            <ItemTemplate>
-                                <tr>
-                                    <td><%# Eval("anio") %></td>
-                                    <td><%# Eval("mes") %></td>
-                                    <td><%# Eval("cantidadPagos") %></td>
-                                    <td><%# $"{Eval("totalIngresos"):C0}" %></td>
-                                </tr>
-                            </ItemTemplate>
-                        </asp:Repeater>
-                    </tbody>
-                </table>
+                <div class="ingresos-table-wrap">
+                    <table id="tablaIngresosMensuales" class="table-cebra" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Anio</th>
+                                <th>Mes</th>
+                                <th>Cantidad Pagos</th>
+                                <th>Total Ingresos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <asp:Repeater runat="server" ID="rpIngresosMensuales">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# Eval("anio") %></td>
+                                        <td><%# Eval("mes") %></td>
+                                        <td><%# Eval("cantidadPagos") %></td>
+                                        <td><%# $"{Eval("totalIngresos"):C0}" %></td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section class="ingresos-card">
                 <div class="ingresos-card__title">Pagos recibidos</div>
-                <p class="ingresos-card__text">Detalle de pagos reales registrados con su metodo, comprobante y cliente.</p>
-                <table id="tablaPagosRecibidos" class="table-cebra" style="width:100%;">
+                <p class="ingresos-card__text">Historial general de pagos registrados con su metodo, comprobante y cliente.</p>
+                <div class="ingresos-table-wrap">
+                    <table id="tablaPagosRecibidos" class="table-cebra" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Metodo</th>
+                                <th>Valor</th>
+                                <th>Comprobante</th>
+                                <th>Referencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <asp:Repeater runat="server" ID="rpPagosRecibidos">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# Eval("fechaPago", "{0:yyyy-MM-dd}") %></td>
+                                        <td><%# Eval("nombreComercial") %></td>
+                                        <td><%# Eval("nombreMetodo") %></td>
+                                        <td><%# $"{Eval("valorRecibido"):C0}" %></td>
+                                        <td><%# Eval("numeroComprobante") %></td>
+                                        <td><%# Eval("referenciaPago") %></td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <section class="pagos-gestion-card">
+            <div class="ingresos-card__title">Gestion de pagos reportados</div>
+            <p class="ingresos-card__text">Filtra, revisa y elimina pagos mal reportados para reactivar el cobro correcto del cliente que realmente sigue debiendo.</p>
+
+            <div class="pagos-filters">
+                <div class="pagos-filter">
+                    <label for="<%= txtFiltroPago.ClientID %>">Cliente, representante, referencia o comprobante</label>
+                    <asp:TextBox runat="server" ID="txtFiltroPago" CssClass="form-control" AutoPostBack="true" OnTextChanged="FiltrosPagoChanged" />
+                </div>
+                <div class="pagos-filter">
+                    <label for="<%= ddlFiltroMetodoPago.ClientID %>">Metodo</label>
+                    <asp:DropDownList runat="server" ID="ddlFiltroMetodoPago" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="FiltrosPagoChanged" />
+                </div>
+                <div class="pagos-filter">
+                    <label for="<%= ddlFiltroPeriodoPago.ClientID %>">Periodo</label>
+                    <asp:DropDownList runat="server" ID="ddlFiltroPeriodoPago" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="FiltrosPagoChanged">
+                        <asp:ListItem Text="Todos" Value="" />
+                        <asp:ListItem Text="Hoy" Value="hoy" />
+                        <asp:ListItem Text="Ultimos 7 dias" Value="7" />
+                        <asp:ListItem Text="Ultimos 30 dias" Value="30" />
+                        <asp:ListItem Text="Ultimos 90 dias" Value="90" />
+                    </asp:DropDownList>
+                </div>
+                <div class="pagos-filter pagos-filter-actions">
+                    <asp:LinkButton runat="server" ID="btnLimpiarFiltrosPago" CssClass="btn btn-outline-primary w-100" OnClick="btnLimpiarFiltrosPago_Click"><i class="fas fa-eraser"></i>&nbsp;Limpiar</asp:LinkButton>
+                </div>
+            </div>
+
+            <div class="ingresos-table-wrap">
+                <table id="tablaPagosGestion" class="table-cebra" style="width:100%;">
                     <thead>
                         <tr>
                             <th>Fecha</th>
                             <th>Cliente</th>
+                            <th>Representante</th>
                             <th>Metodo</th>
                             <th>Valor</th>
                             <th>Comprobante</th>
                             <th>Referencia</th>
+                            <th>Observacion</th>
+                            <th>Opcion</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <asp:Repeater runat="server" ID="rpPagosRecibidos">
+                        <asp:Repeater runat="server" ID="rpPagosGestion">
                             <ItemTemplate>
                                 <tr>
                                     <td><%# Eval("fechaPago", "{0:yyyy-MM-dd}") %></td>
                                     <td><%# Eval("nombreComercial") %></td>
+                                    <td><%# Eval("nombreRepresentate") %></td>
                                     <td><%# Eval("nombreMetodo") %></td>
                                     <td><%# $"{Eval("valorRecibido"):C0}" %></td>
                                     <td><%# Eval("numeroComprobante") %></td>
                                     <td><%# Eval("referenciaPago") %></td>
+                                    <td><%# Eval("observacion") %></td>
+                                    <td class="text-center">
+                                        <asp:LinkButton runat="server" ID="btnEliminarPago" CssClass="pagos-action pagos-action--delete" ToolTip="Eliminar pago reportado" OnClick="btnEliminarPago_Click" OnClientClick="return confirm('Se eliminara este pago y se reactivara el cobro asociado. ¿Deseas continuar?');" CommandArgument='<%# Eval("id") %>'><i class="fas fa-trash-alt"></i></asp:LinkButton>
+                                    </td>
                                 </tr>
                             </ItemTemplate>
                         </asp:Repeater>
                     </tbody>
                 </table>
-            </section>
-        </div>
+            </div>
+            <asp:Label runat="server" ID="lblSinPagos" CssClass="pagos-empty" Visible="false" Text="No se encontraron pagos con los filtros aplicados." />
+        </section>
     </div>
     <script src="js/myScripts.js"></script>
 </asp:Content>

@@ -43,12 +43,17 @@
 .table-container {
     max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border-left: solid 1px #cfe2f3;
     border-right: solid 1px #cfe2f3;
     border-bottom: solid 1px #cfe2f3;
     border-radius: 16px;
     background:#ffffff;
 }
+
+    .table-container > .table-cebra {
+        min-width: 720px;
+    }
 
         .table-cebra .sticky{
             position:sticky;
@@ -62,3 +67,19 @@
     .table-cebra tbody tr:nth-child(2n) .sticky {
         background: #f6fbff;
     }
+
+@media (max-width: 767.98px) {
+    .table-cebra thead th {
+        font-size: .8rem;
+        padding: .5rem;
+    }
+
+    .table-cebra td {
+        font-size: .85rem;
+        padding: .48rem .5rem;
+    }
+
+    .table-container {
+        border-radius: 14px;
+    }
+}
