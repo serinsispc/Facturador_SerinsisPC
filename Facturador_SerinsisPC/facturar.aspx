@@ -21,6 +21,14 @@
         .facturar-form label { color: #2a22a6; font-weight: 700; font-size: .88rem; margin-bottom: .3rem; }
         .facturar-form .form-control { min-height: 42px; border: 1px solid #cfe2f3; border-radius: 12px; color: #243a60; box-shadow: none; }
         .facturar-form .form-control:focus { border-color: #62afe2; box-shadow: 0 0 0 .16rem rgba(98, 175, 226, 0.18); }
+        .facturar-form .row > div { margin-bottom: .8rem; }
+        .facturar-form .input-group { width: 100%; flex-wrap: nowrap; }
+        .facturar-form .input-group > .form-control { min-width: 0; }
+        .facturar-form .input-group-append { display: flex; }
+        .cliente-search-group,
+        .input-group.cliente-search-group {
+            width: 100%;
+        }
         .facturar-readonly { background: #f3f8ff; }
         .facturar-search-btn, .facturar-main-btn { border-radius: 12px; font-weight: 700; }
         .facturar-search-btn { background: #eef8fe; border: 1px solid #cfe2f3; color: #2a22a6; }
@@ -35,6 +43,7 @@
         .facturar-option--delete { background: #fff0f2; color: #d8344a; }
         .facturar-modal .modal-content { border: 1px solid #cfe2f3; border-radius: 18px; box-shadow: 0 22px 46px rgba(42, 34, 166, 0.14); overflow: hidden; }
         .facturar-page .Modal-padre { display: flex; align-items: center; justify-content: center; padding: 1.25rem; background: rgba(16, 27, 55, 0.28); backdrop-filter: blur(3px); z-index: 1200; }
+        .facturar-page .Modal-padre > div { width: 100%; display: flex; justify-content: center; }
         .facturar-modal.modal-dialog { width: 100%; max-width: 980px !important; margin: 0 auto; }
         .facturar-modal .modal-header { background: linear-gradient(135deg, #2a22a6 0%, #62afe2 100%); color: #ffffff; border-bottom: 0; padding: .9rem 1rem; display: flex; align-items: center; justify-content: space-between; }
         .facturar-modal .modal-title { font-weight: 700; margin: 0; }
@@ -42,6 +51,14 @@
         .facturar-modal .modal-body { background: #fbfdff; padding: 1rem; }
         .facturar-modal .modal-footer { background: #f5f9ff; border-top: 1px solid #d8e6f4; padding: .8rem 1rem; display: flex; justify-content: flex-end; gap: .6rem; }
         .facturar-select-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; background: #eef8fe; color: #2a22a6; text-decoration: none; }
+        .facturar-modal .dataTables_wrapper .dataTables_length,
+        .facturar-modal .dataTables_wrapper .dataTables_filter,
+        .facturar-modal .dataTables_wrapper .dataTables_info,
+        .facturar-modal .dataTables_wrapper .dataTables_paginate { width: 100%; }
+        .facturar-modal .dataTables_wrapper { width: 100% !important; max-width: 100% !important; overflow-x: auto; overflow-y: hidden; }
+        .facturar-modal .dataTables_wrapper .row { margin-left: 0; margin-right: 0; }
+        .facturar-modal .dataTables_wrapper .dataTables_filter { text-align: right; }
+        .facturar-modal .dataTables_wrapper .dataTables_filter input { width: min(220px, 100%); max-width: 100%; }
         .facturar-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-top: .8rem; }
         .facturar-meta__item { background: #ffffff; border: 1px solid #d8e6f4; border-radius: 14px; padding: .7rem .8rem; }
         .facturar-meta__label { display: block; color: #61779c; font-size: .78rem; font-weight: 700; text-transform: uppercase; }
@@ -81,15 +98,86 @@
                 flex-direction: column;
             }
 
-            .facturar-page .Modal-padre { padding: .55rem; align-items: flex-start; overflow-y: auto; }
-            .facturar-modal.modal-dialog { max-width: 100% !important; }
+            .facturar-page .Modal-padre { padding: 8px; align-items: flex-start; overflow-y: auto; overflow-x: hidden; }
+            .facturar-page .Modal-padre > div { width: 100%; max-width: 100%; justify-content: center; }
+            .facturar-modal.modal-dialog {
+                width: calc(100vw - 16px) !important;
+                max-width: calc(100vw - 16px) !important;
+                margin: 8px auto !important;
+            }
+            .facturar-modal .modal-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: hidden !important;
+            }
+            .facturar-modal .modal-header {
+                padding: .8rem .85rem;
+            }
+            .facturar-modal .modal-title {
+                font-size: 1rem;
+                line-height: 1.25;
+                padding-right: .5rem;
+            }
+            .facturar-modal .modal-body {
+                padding: 8px !important;
+                max-width: 100% !important;
+                overflow-x: auto !important;
+                overflow-y: auto !important;
+            }
             .facturar-meta { grid-template-columns: 1fr; }
             .facturar-table-toolbar { justify-content: stretch; }
             .facturar-table-filter { width: 100%; flex-direction: column; align-items: stretch; }
             .facturar-table-filter select { width: 100%; }
-            .facturar-table-wrap { padding: .2rem; }
+            .facturar-table-wrap {
+                width: 100%;
+                max-width: 100%;
+                padding: .15rem;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+            .cliente-search-group,
+            .input-group.cliente-search-group {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 100% !important;
+                gap: 8px !important;
+            }
+            .cliente-search-group > .form-control,
+            .cliente-search-group .form-control {
+                width: 100% !important;
+                min-height: 44px !important;
+                border-radius: 12px !important;
+            }
+            .cliente-search-group .input-group-append {
+                width: 100% !important;
+                display: flex !important;
+            }
+            .cliente-search-group .input-group-append .btn,
+            .cliente-search-group .input-group-append .facturar-search-btn,
+            .cliente-search-group .btn,
+            .cliente-search-group button {
+                width: 100%;
+                min-height: 44px !important;
+                border-radius: 12px !important;
+                justify-content: center;
+            }
+            .facturar-modal .dataTables_wrapper {
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow-x: auto !important;
+            }
+            .facturar-modal .dataTables_wrapper .dataTables_filter {
+                text-align: left;
+            }
+            .facturar-modal .dataTables_wrapper .dataTables_length,
+            .facturar-modal .dataTables_wrapper .dataTables_filter,
+            .facturar-modal .dataTables_wrapper .dataTables_info,
+            .facturar-modal .dataTables_wrapper .dataTables_paginate {
+                width: 100%;
+                text-align: left !important;
+            }
             .facturar-table { min-width: 920px; }
-            .facturar-table--compact { min-width: 700px; }
+            .facturar-table--compact { min-width: 640px; }
         }
     </style>
 </asp:Content>
@@ -223,7 +311,7 @@
                     </div>
                     <div class="form-group col-md-8">
                         <label>Cliente</label>
-                        <div class="input-group">
+                        <div class="input-group cliente-search-group">
                             <asp:TextBox runat="server" ID="txtCliente" CssClass="form-control facturar-readonly" ReadOnly="true" />
                             <div class="input-group-append">
                                 <asp:LinkButton runat="server" class="btn facturar-search-btn" ID="btnBUscarCliente" OnClick="btnBUscarCliente_Click" CausesValidation="false"><i class="fas fa-search"></i>&nbsp;Buscar</asp:LinkButton>

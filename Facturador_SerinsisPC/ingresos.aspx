@@ -2,6 +2,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
         .ingresos-page { display: flex; flex-direction: column; gap: .9rem; }
+        .ingresos-page .container-fluid { padding-left: .2rem; padding-right: .2rem; }
         .ingresos-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
         .ingresos-header__title { display: flex; align-items: center; gap: .7rem; color: #2a22a6; margin: 0; font-size: 2rem; font-weight: 700; }
         .ingresos-header__title i { color: #62afe2; font-size: 1.7rem; }
@@ -11,7 +12,9 @@
         .ingresos-card__title { color: #2a22a6; font-weight: 700; font-size: .95rem; margin-bottom: .25rem; }
         .ingresos-card__text { color: #61779c; font-size: .92rem; margin-bottom: .8rem; }
         .ingresos-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .ingresos-table-wrap .table-cebra { min-width: 560px; }
+        .ingresos-table-wrap .dataTables_wrapper { width: 100%; min-width: 100%; }
+        .ingresos-table { width: 100% !important; min-width: 680px; }
+        .ingresos-table--wide { min-width: 980px; }
         .pagos-gestion-card { background: linear-gradient(135deg, #fbfdff 0%, #f3f9ff 100%); border: 1px solid #cfe2f3; border-radius: 16px; padding: .95rem 1rem; box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05); }
         .pagos-filters { display: grid; grid-template-columns: minmax(220px, 1.2fr) minmax(180px, .7fr) minmax(180px, .7fr) auto; gap: .75rem; margin-bottom: .95rem; }
         .pagos-filter label { display: block; color: #2a22a6; font-weight: 700; font-size: .84rem; margin-bottom: .28rem; }
@@ -30,6 +33,8 @@
 
             .ingresos-grid { grid-template-columns: 1fr; }
             .pagos-filters { grid-template-columns: 1fr 1fr; }
+            .ingresos-table { min-width: 640px; }
+            .ingresos-table--wide { min-width: 900px; }
         }
 
         @media (max-width: 767.98px) {
@@ -38,6 +43,10 @@
             }
 
             .pagos-filters { grid-template-columns: 1fr; }
+            .ingresos-card,
+            .pagos-gestion-card { padding: .9rem .75rem; }
+            .ingresos-table { min-width: 620px; }
+            .ingresos-table--wide { min-width: 860px; }
         }
     </style>
 </asp:Content>
@@ -55,7 +64,7 @@
                 <div class="ingresos-card__title">Ingresos por mes</div>
                 <p class="ingresos-card__text">Resumen del dinero realmente recibido, agrupado por anio y mes.</p>
                 <div class="ingresos-table-wrap">
-                    <table id="tablaIngresosMensuales" class="table-cebra" style="width:100%;">
+                    <table id="tablaIngresosMensuales" class="table-cebra ingresos-table" style="width:100%;">
                         <thead>
                             <tr>
                                 <th>Anio</th>
@@ -84,7 +93,7 @@
                 <div class="ingresos-card__title">Pagos recibidos</div>
                 <p class="ingresos-card__text">Historial general de pagos registrados con su metodo, comprobante y cliente.</p>
                 <div class="ingresos-table-wrap">
-                    <table id="tablaPagosRecibidos" class="table-cebra" style="width:100%;">
+                    <table id="tablaPagosRecibidos" class="table-cebra ingresos-table" style="width:100%;">
                         <thead>
                             <tr>
                                 <th>Fecha</th>
@@ -143,7 +152,7 @@
             </div>
 
             <div class="ingresos-table-wrap">
-                <table id="tablaPagosGestion" class="table-cebra" style="width:100%;">
+                <table id="tablaPagosGestion" class="table-cebra ingresos-table ingresos-table--wide" style="width:100%;">
                     <thead>
                         <tr>
                             <th>Fecha</th>

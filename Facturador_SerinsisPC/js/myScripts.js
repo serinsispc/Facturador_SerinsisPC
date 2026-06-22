@@ -130,6 +130,120 @@ $('#tablaUsuarios').dataTable({
 $('#tabla_cobrosEnviados').dataTable({
     "lengthMenu": [10, 25, 50, 100],
     "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
+    language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningun dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoFiltered": "filtrados de un total de _MAX_ registros",
+        "search": "Buscar:",
+        "infoThousands": ",",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "aria": {
+            "sortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    }
+});
+
+$('#tablaControlPagos').dataTable({
+    "lengthMenu": [10, 25, 50, 100],
+    "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
+    language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningun dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoFiltered": "filtrados de un total de _MAX_ registros",
+        "search": "Buscar:",
+        "infoThousands": ",",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "aria": {
+            "sortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    }
+});
+
+$('#tablaIngresosMensuales').dataTable({
+    "lengthMenu": [10, 25, 50, 100],
+    "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
+    language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningun dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoFiltered": "filtrados de un total de _MAX_ registros",
+        "search": "Buscar:",
+        "infoThousands": ",",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "aria": {
+            "sortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    }
+});
+
+$('#tablaPagosRecibidos').dataTable({
+    "lengthMenu": [10, 25, 50, 100],
+    "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
+    language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningun dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoFiltered": "filtrados de un total de _MAX_ registros",
+        "search": "Buscar:",
+        "infoThousands": ",",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "aria": {
+            "sortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    }
+});
+
+$('#tablaPagosGestion').dataTable({
+    "lengthMenu": [10, 25, 50, 100],
+    "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
     language: {
         "processing": "Procesando...",
         "lengthMenu": "Mostrar _MENU_ registros",
@@ -156,6 +270,8 @@ $('#tabla_cobrosEnviados').dataTable({
 $('#tablaCuentas').dataTable({
     "lengthMenu": [10, 25, 50, 100],
     "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
     language: {
         "processing": "Procesando...",
         "lengthMenu": "Mostrar _MENU_ registros",
@@ -182,6 +298,36 @@ $('#tablaCuentas').dataTable({
 $('#tablaDB_Clientes').dataTable({
     "lengthMenu": [10, 25, 50, 100],
     "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
+    language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningun dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoFiltered": "filtrados de un total de _MAX_ registros",
+        "search": "Buscar:",
+        "infoThousands": ",",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        },
+        "aria": {
+            "sortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    }
+});
+
+$('#tablaMensajes').dataTable({
+    "lengthMenu": [10, 25, 50, 100],
+    "pageLength": 10,
+    "scrollX": true,
+    "autoWidth": false,
     language: {
         "processing": "Procesando...",
         "lengthMenu": "Mostrar _MENU_ registros",

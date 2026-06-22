@@ -172,6 +172,45 @@
             .login-brand { padding: 2rem 1.3rem; }
             .login-panel-wrap { padding: 1rem 1rem 2rem; }
         }
+
+        @media (max-width: 767.98px) {
+            .login-brand {
+                padding: 1.5rem 1rem;
+                gap: 1rem;
+            }
+
+            .login-brand__logo {
+                width: 72px;
+                height: 72px;
+                border-radius: 18px;
+            }
+
+            .login-brand__title {
+                font-size: 1.9rem;
+            }
+
+            .login-brand__text {
+                font-size: .94rem;
+            }
+
+            .login-panel-wrap {
+                padding: .75rem .75rem 1.5rem;
+            }
+
+            .login-panel__header,
+            .login-panel__body {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .login-panel__title {
+                font-size: 1.2rem;
+            }
+
+            .login-tabs {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>

@@ -7,6 +7,10 @@
             gap: .9rem;
         }
 
+        .cliente-edit-page .row > div {
+            margin-bottom: .85rem;
+        }
+
         .cliente-edit-header {
             display: flex;
             align-items: center;
@@ -101,6 +105,33 @@
             background: #fff4e8;
             border: 1px solid #ffd8b1;
             color: #9a4d00;
+        }
+
+        @media (max-width: 767.98px) {
+            .cliente-edit-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .cliente-edit-title {
+                font-size: 1.6rem;
+            }
+
+            .cliente-edit-header .btn {
+                width: 100%;
+            }
+
+            .cliente-edit-card__body {
+                padding: .85rem;
+            }
+
+            .cliente-edit-actions {
+                flex-direction: column;
+            }
+
+            .cliente-edit-actions .btn {
+                width: 100%;
+            }
         }
     </style>
 </asp:Content>

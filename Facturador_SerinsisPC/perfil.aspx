@@ -19,6 +19,15 @@
         .perfil-form .form-control:focus { border-color:#62afe2; box-shadow:0 0 0 .16rem rgba(98,175,226,.18); }
         .perfil-btn { min-height: 46px; border:0; border-radius:14px; font-weight:700; background:linear-gradient(135deg,#3c35c6 0%,#2a22a6 100%); box-shadow:0 12px 24px rgba(42,34,166,.18); }
         @media (max-width: 991.98px) { .perfil-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 767.98px) {
+            .perfil-header__title {
+                font-size: 1.6rem;
+            }
+
+            .perfil-card {
+                padding: .9rem .75rem;
+            }
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">

@@ -128,10 +128,13 @@
             border: 1px solid #d7e5f3;
             border-radius: 16px;
             padding: .3rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .db-table {
             width: 100%;
+            min-width: 680px;
         }
 
         .db-state {
@@ -176,6 +179,39 @@
         @media (max-width: 991.98px) {
             .db-form-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .db-modal-page {
+                padding: .2rem 0 .75rem;
+                align-items: flex-start;
+            }
+
+            .db-modal-shell {
+                padding: .55rem;
+                border-radius: 18px;
+            }
+
+            .db-modal-header {
+                padding: .85rem .9rem;
+                align-items: flex-start;
+            }
+
+            .db-modal-title {
+                font-size: 1.2rem;
+            }
+
+            .db-modal-body {
+                padding: .85rem;
+            }
+
+            .db-primary-btn {
+                width: 100%;
+            }
+
+            .db-table {
+                min-width: 620px;
             }
         }
     </style>

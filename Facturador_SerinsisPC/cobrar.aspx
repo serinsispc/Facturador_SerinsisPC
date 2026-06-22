@@ -2,6 +2,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
         .cobrar-page { display: flex; flex-direction: column; gap: .9rem; }
+        .cobrar-page .container-fluid { padding-left: .2rem; padding-right: .2rem; }
         .cobrar-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
         .cobrar-header__title { display: flex; align-items: center; gap: .7rem; color: #2a22a6; margin: 0; font-size: 2rem; font-weight: 700; }
         .cobrar-header__title i { color: #62afe2; font-size: 1.7rem; }
@@ -10,8 +11,8 @@
         .cobrar-btn { border-radius: 12px; font-weight: 700; padding: .6rem 1rem; }
         .cobrar-btn--primary { background: linear-gradient(135deg, #3c35c6 0%, #2a22a6 100%); border: 0; color: #fff; }
         .cobrar-btn--secondary { background: #eef8fe; border: 1px solid #cfe2f3; color: #2a22a6; }
-        .cobrar-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 1rem; }
-        .cobrar-card { background: linear-gradient(135deg, #fbfdff 0%, #f3f9ff 100%); border: 1px solid #cfe2f3; border-radius: 16px; padding: .95rem 1rem; box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05); }
+        .cobrar-grid { display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(0, .98fr); gap: 1rem; align-items: start; }
+        .cobrar-card { min-width: 0; background: linear-gradient(135deg, #fbfdff 0%, #f3f9ff 100%); border: 1px solid #cfe2f3; border-radius: 16px; padding: .95rem 1rem; box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05); }
         .cobrar-card__title { color: #2a22a6; font-weight: 700; font-size: .95rem; margin-bottom: .25rem; }
         .cobrar-card__text { color: #61779c; font-size: .92rem; margin-bottom: .8rem; }
         .cobrar-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .85rem; }
@@ -20,24 +21,88 @@
         .cobrar-summary__value { display: block; color: #2a22a6; font-size: 1.3rem; font-weight: 700; margin-top: .2rem; }
         .cobrar-summary__note { display: block; color: #61779c; font-size: .84rem; margin-top: .22rem; }
         .cobrar-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-bottom: .95rem; }
-        .cobrar-filters--history { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .cobrar-filters--history { grid-template-columns: minmax(0, 1.35fr) minmax(180px, .8fr); }
+        .cobrar-filters--history .cobrar-filter-actions { grid-column: 1 / -1; justify-content: flex-end; }
         .cobrar-filter label { display: block; color: #2a22a6; font-weight: 700; font-size: .84rem; margin-bottom: .28rem; }
+        .cobrar-filter { min-width: 0; }
         .cobrar-filter .form-control { min-height: 40px; border: 1px solid #cfe2f3; border-radius: 12px; color: #243a60; box-shadow: none; }
         .cobrar-filter .form-control:focus { border-color: #62afe2; box-shadow: 0 0 0 .16rem rgba(98, 175, 226, 0.18); }
         .cobrar-filter-actions { display: flex; align-items: end; }
         .cobrar-badge { display: inline-flex; align-items: center; gap: .45rem; padding: .35rem .6rem; border-radius: 999px; font-size: .84rem; font-weight: 700; }
         .cobrar-badge--ok { background: #ecfbf2; color: #1f9b53; }
         .cobrar-badge--warn { background: #fff7e7; color: #c98916; }
-        .cobrar-table-wrap { overflow-x: auto; }
+        .cobrar-table-wrap { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+        .cobrar-table-wrap .dataTables_wrapper { width: 100%; min-width: 100%; }
+        .cobrar-table-wrap .dataTables_wrapper .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        .cobrar-table-wrap .dataTables_length,
+        .cobrar-table-wrap .dataTables_filter,
+        .cobrar-table-wrap .dataTables_info,
+        .cobrar-table-wrap .dataTables_paginate {
+            padding-left: .35rem;
+            padding-right: .35rem;
+        }
+        .cobrar-table-wrap .dataTables_length label,
+        .cobrar-table-wrap .dataTables_filter label {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-bottom: .45rem;
+            color: #2a22a6;
+            font-weight: 700;
+            font-size: .84rem;
+        }
+        .cobrar-table-wrap .dataTables_length select,
+        .cobrar-table-wrap .dataTables_filter input {
+            min-height: 40px;
+            border: 1px solid #cfe2f3;
+            border-radius: 12px;
+            color: #243a60;
+            box-shadow: none;
+            background: #ffffff;
+        }
+        .cobrar-table-wrap .dataTables_filter input {
+            width: min(220px, 100%);
+            max-width: 100%;
+            margin-left: 0 !important;
+        }
+        .cobrar-table-wrap .dataTables_filter {
+            text-align: right;
+        }
+
+        .cobrar-table-wrap .dataTables_filter label {
+            justify-content: flex-end;
+        }
+
+        .cobrar-table-wrap .dataTables_info {
+            color: #61779c;
+            font-size: .85rem;
+        }
+        .cobrar-table-wrap .dataTables_paginate .paginate_button {
+            border-radius: 10px !important;
+        }
+        .cobrar-table { width: 100% !important; min-width: 780px; }
+        .cobrar-table--wide { min-width: 980px; }
+        @media (max-width: 1399.98px) {
+            .cobrar-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 991.98px) {
             .cobrar-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
 
-            .cobrar-grid { grid-template-columns: 1fr; }
             .cobrar-summary-grid { grid-template-columns: 1fr; }
             .cobrar-filters, .cobrar-filters--history { grid-template-columns: 1fr; }
+            .cobrar-filters--history .cobrar-filter-actions { grid-column: auto; }
+            .cobrar-table { min-width: 720px; }
+            .cobrar-table--wide { min-width: 900px; }
         }
 
         @media (max-width: 767.98px) {
@@ -52,6 +117,55 @@
 
             .cobrar-actions .btn {
                 width: 100%;
+            }
+
+            .cobrar-card {
+                padding: .9rem .75rem;
+            }
+
+            .cobrar-table-wrap .dataTables_length,
+            .cobrar-table-wrap .dataTables_filter,
+            .cobrar-table-wrap .dataTables_info,
+            .cobrar-table-wrap .dataTables_paginate {
+                width: 100%;
+                text-align: left !important;
+                padding-left: .2rem;
+                padding-right: .2rem;
+            }
+
+            .cobrar-table-wrap .dataTables_length label,
+            .cobrar-table-wrap .dataTables_filter label {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .cobrar-table-wrap .dataTables_filter {
+                text-align: left;
+            }
+
+            .cobrar-filters--history .cobrar-filter-actions {
+                justify-content: stretch;
+            }
+
+            .cobrar-table-wrap .dataTables_length select,
+            .cobrar-table-wrap .dataTables_filter input {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .cobrar-table-wrap .dataTables_paginate {
+                display: flex;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: .35rem;
+            }
+
+            .cobrar-table {
+                min-width: 700px;
+            }
+
+            .cobrar-table--wide {
+                min-width: 880px;
             }
         }
     </style>
@@ -120,7 +234,7 @@
                     </div>
                 </div>
                 <div class="cobrar-table-wrap">
-                    <table id="tablaControlPagos" class="table-cebra" style="width:100%;">
+                    <table id="tablaControlPagos" class="table-cebra cobrar-table" style="width:100%;">
                         <thead>
                             <tr>
                                 <th>Cliente</th>
@@ -171,7 +285,7 @@
                     </div>
                 </div>
                 <div class="cobrar-table-wrap">
-                    <table id="tabla_cobrosEnviados" class="table-cebra" style="width:100%;">
+                    <table id="tabla_cobrosEnviados" class="table-cebra cobrar-table cobrar-table--wide" style="width:100%;">
                         <thead>
                             <tr>
                                 <th>Fecha</th>

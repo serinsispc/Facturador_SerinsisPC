@@ -83,3 +83,92 @@
         border-radius: 14px;
     }
 }
+
+.dataTables_wrapper {
+    width: 100%;
+}
+
+    .dataTables_wrapper .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .dataTables_wrapper .col-sm-12,
+    .dataTables_wrapper .col-md-6,
+    .dataTables_wrapper .col-md-5,
+    .dataTables_wrapper .col-md-7 {
+        padding-left: .25rem;
+        padding-right: .25rem;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-bottom: .55rem;
+    }
+
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: 0;
+        color: #2a22a6;
+        font-weight: 700;
+        font-size: .84rem;
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        min-height: 40px;
+        border: 1px solid #cfe2f3;
+        border-radius: 12px;
+        color: #243a60;
+        background: #ffffff;
+        box-shadow: none;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        margin-left: 0 !important;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        color: #61779c;
+        font-size: .85rem;
+        padding-top: .35rem !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 10px !important;
+    }
+
+@media (max-width: 767.98px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        width: 100%;
+        text-align: left !important;
+    }
+
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        flex-direction: column;
+        align-items: stretch;
+        gap: .35rem;
+    }
+
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: .35rem;
+    }
+}

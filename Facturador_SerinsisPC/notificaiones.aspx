@@ -55,10 +55,12 @@
             padding: .3rem;
             box-shadow: 0 10px 24px rgba(42, 34, 166, 0.05);
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .mensajes-table {
             width: 100%;
+            min-width: 760px;
         }
 
         .mensajes-table thead th {
@@ -190,6 +192,10 @@
 
             .mensajes-modal .modal-footer .btn {
                 width: 100%;
+            }
+
+            .mensajes-table {
+                min-width: 700px;
             }
         }
     </style>
